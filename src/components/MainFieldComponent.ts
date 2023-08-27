@@ -1,17 +1,21 @@
 import {Application} from "pixi.js";
 import FieldComponent from "./FieldComponent";
 import BlockComponent from "./BlockComponent";
-import state from "../services/StateService";
+import state, {StateService} from "../services/StateService";
+import {IPosition} from "../interfaces";
+import {BLOCK_SIZE, BLOCKS_IN_ROW, FIELD_PADDING, FIELD_SIZE} from "../constants";
 
 export default class MainFieldComponent {
   field: FieldComponent
   blocks: BlockComponent[]
   app: Application
+  state: StateService
   
   constructor(field: FieldComponent, blocks: BlockComponent[], app: Application) {
     this.field = field
     this.blocks = blocks
     this.app = app
+    this.state = state
   }
   
   async render() {
@@ -22,13 +26,27 @@ export default class MainFieldComponent {
     mainFieldSprite.anchor.y = 0.5;
     this.app.stage.addChild(mainFieldSprite);
     
-    const firstBlock = this.blocks[0]
+    const startX = (this.app.renderer.width / 2) - FIELD_SIZE / 2 + FIELD_PADDING
     
-    firstBlock.x = this.app.renderer.width / 2;
-    blockSprite.y = this.app.renderer.height / 2;
-    blockSprite.anchor.x = 0.5;
-    blockSprite.anchor.y = 0.5;
+    const currentPosition: IPosition = {
+      x: startX,
+      y: (this.app.renderer.height / 2) - FIELD_SIZE / 2 + FIELD_PADDING,
+    }
     
-    this.app.stage.addChild(blockSprite);
+    let index = 1
+    
+    for (const block of this.blocks) {
+      const renderBlock = await block.render();
+      renderBlock.x = currentPosition.x
+      renderBlock.y = currentPosition.y
+      this.app.stage.addChild(renderBlock);
+      if (index % BLOCKS_IN_ROW === 0) {
+        currentPosition.y += BLOCK_SIZE
+        currentPosition.x = startX
+      } else {
+        currentPosition.x += BLOCK_SIZE
+      }
+      index++
+    }
   }
 }
