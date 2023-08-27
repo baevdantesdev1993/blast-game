@@ -39,7 +39,6 @@ export default class MainFieldComponent {
       const renderBlock = await block.render();
       renderBlock.x = currentPosition.x
       renderBlock.y = currentPosition.y
-      this.app.stage.addChild(renderBlock);
       if (index % BLOCKS_IN_ROW === 0) {
         currentPosition.y += BLOCK_SIZE
         currentPosition.x = startX
@@ -47,6 +46,7 @@ export default class MainFieldComponent {
         currentPosition.x += BLOCK_SIZE
       }
       index++
+      this.app.stage.addChild(renderBlock);
     }
   }
 }

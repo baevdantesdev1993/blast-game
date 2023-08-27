@@ -15,6 +15,6 @@ document.getElementById('app').appendChild(app.view);
 (async () => {
   await new MainFieldComponent(
     new FieldComponent(),
-    state.blocksList.map((b) =>  new BlockComponent(b.color)),
+    state.blocksList.map((b) =>  new BlockComponent(b, state)),
     app).render()
 })();
