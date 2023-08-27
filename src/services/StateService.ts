@@ -40,6 +40,30 @@ export class StateService implements IStateService {
     })
   }
   
+  private getBottom(block: IBlock) {
+    return this.blocksList.find((b) => {
+      return block.position.x === b.position.x
+        && b.position.y === block.position.y + 1
+        && b.color === block.color
+    })
+  }
+  
+  private getRight(block: IBlock) {
+    return this.blocksList.find((b) => {
+      return block.position.x === b.position.x + 1
+        && b.position.y === block.position.y
+        && b.color === block.color
+    })
+  }
+  
+  private getRLeft(block: IBlock) {
+    return this.blocksList.find((b) => {
+      return block.position.x === b.position.x - 1
+        && b.position.y === block.position.y
+        && b.color === block.color
+    })
+  }
+  
   
   private compareBlocksPositions(target: IBlock, source: IBlock): boolean {
     return target.position.x === source.position.x
@@ -55,6 +79,39 @@ export class StateService implements IStateService {
       while (upperTop) {
         blocksAround.push(upperTop)
         upperTop = this.getTop(upperTop)
+      }
+    }
+    
+    const right = this.getRight(originalBlock)
+    
+    if (right) {
+      blocksAround.push(right)
+      let furtherRight = this.getRight(right)
+      while (furtherRight) {
+        blocksAround.push(furtherRight)
+        furtherRight = this.getRight(furtherRight)
+      }
+    }
+    
+    const left = this.getRLeft(originalBlock)
+    
+    if (left) {
+      blocksAround.push(left)
+      let furtherLeft = this.getRLeft(left)
+      while (furtherLeft) {
+        blocksAround.push(furtherLeft)
+        furtherLeft = this.getRLeft(furtherLeft)
+      }
+    }
+    
+    const bottom = this.getBottom(originalBlock)
+    
+    if (bottom) {
+      blocksAround.push(bottom)
+      let furtherBottom = this.getBottom(bottom)
+      while (furtherBottom) {
+        blocksAround.push(furtherBottom)
+        furtherBottom = this.getBottom(furtherBottom)
       }
     }
     
