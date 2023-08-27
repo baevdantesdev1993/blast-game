@@ -1,4 +1,8 @@
 import {Application} from "pixi.js";
+import FieldComponent from "./components/FieldComponent";
+import MainFieldComponent from "./components/MainFieldComponent";
+import BlockComponent from "./components/BlockComponent";
+import state from "./services/StateService";
 
 
 const app = new Application<HTMLCanvasElement>({
@@ -6,4 +10,11 @@ const app = new Application<HTMLCanvasElement>({
   resizeTo: window
 });
 
-document.getElementById('app').appendChild(app.view)
+document.getElementById('app').appendChild(app.view);
+
+(async () => {
+  await new MainFieldComponent(
+    new FieldComponent(),
+    [new BlockComponent(state.blocksList[0].color)],
+    app).render()
+})();

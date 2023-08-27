@@ -1,16 +1,21 @@
 import blocksMap, {BlockColor} from "../utils/blocksMap";
 import {IBaseComponent} from "../interfaces";
-import {BLOCK_SIZE} from "../constants";
+import {BLOCK_SIZE, FIELD_SIZE} from "../constants";
+import {Assets, Sprite} from "pixi.js";
 
 export default class BlockComponent implements IBaseComponent {
-  private readonly block: HTMLImageElement = null
+  private readonly image: HTMLImageElement = null
   
   constructor(color: BlockColor) {
-    this.block = new Image(BLOCK_SIZE, BLOCK_SIZE)
-    this.block.src = blocksMap[color]
+    this.image = new Image(BLOCK_SIZE, BLOCK_SIZE)
+    this.image.src = blocksMap[color]
   }
   
-  public render() {
-    return this.block
+  public async render() {
+    const texture = await Assets.load(this.image.src);
+    const sprite = new Sprite(texture);
+    sprite.width = BLOCK_SIZE
+    sprite.height = BLOCK_SIZE
+    return sprite
   }
 }
