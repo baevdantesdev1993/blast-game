@@ -2,7 +2,7 @@ import blocksMap from "../utils/blocksMap";
 import {IBaseComponent, IBlock} from "../interfaces";
 import {BLOCK_SIZE} from "../constants";
 import {Assets, Sprite} from "pixi.js";
-import {state} from "../index";
+import {renderMainField, state} from "../index";
 
 export default class BlockComponent implements IBaseComponent {
   private readonly image: HTMLImageElement
@@ -15,8 +15,16 @@ export default class BlockComponent implements IBaseComponent {
     this.block = block
   }
   
-  private onClick() {
-    state.onClickBlock(this.block)
+  private async onClick() {
+    console.log(this.block)
+    try {
+      await state.onBlockClick(this.block)
+      await renderMainField()
+    } catch (e) {
+    
+    } finally {
+      state.clearRelatedBlocksList()
+    }
   }
   
   private onMouseDown() {
@@ -38,15 +46,22 @@ export default class BlockComponent implements IBaseComponent {
   public async render() {
     const texture = await Assets.load(this.image.src);
     this.sprite = new Sprite(texture);
-    this.sprite.eventMode = 'static'
-    this.sprite.cursor = 'pointer'
-    this.sprite.on('click', this.onClick, this)
-    this.sprite.on('pointerover', this.onPointerOver, this)
-    this.sprite.on('pointerleave', this.onPointerLeave, this)
-    this.sprite.on('mousedown', this.onMouseDown, this)
-    this.sprite.on('mouseup', this.onMouseUp, this)
-    this.sprite.width = BLOCK_SIZE
-    this.sprite.height = BLOCK_SIZE
+    if (!this.block.empty) {
+      this.sprite.cursor = 'pointer'
+      this.sprite.eventMode = 'static'
+      this.sprite.on('click', this.onClick, this)
+      this.sprite.on('pointerover', this.onPointerOver, this)
+      this.sprite.on('pointerleave', this.onPointerLeave, this)
+      this.sprite.on('mousedown', this.onMouseDown, this)
+      this.sprite.on('mouseup', this.onMouseUp, this)
+    }
+    if (this.block.empty) {
+      this.sprite.width = 0
+      this.sprite.height = 0
+    } else {
+      this.sprite.width = BLOCK_SIZE
+      this.sprite.height = BLOCK_SIZE
+    }
     return this.sprite
   }
 }

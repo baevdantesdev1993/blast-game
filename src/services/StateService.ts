@@ -2,16 +2,32 @@ import {IBlock, IPosition, IStateService} from "../interfaces";
 import {blockColors} from "../utils/blocksMap";
 import {randomIntFromInterval} from "../utils/randomIntFromInterval";
 import {BLASTED_BLOCKS_COUNT, BLOCKS_IN_ROW} from "../constants";
-import {Application} from "pixi.js";
-import {renderMainField} from "../index";
+import {BlockDirection} from "../types";
 
 export class StateService implements IStateService {
   public blocksQuantity: number = 0
   public blocksList: IBlock[] = []
-  private app: Application
+  private blocksAround: IBlock[] = []
+  private turnsCount: number = 0
+  private pointsCount: number = 0
   
-  constructor(quantity: number, app: Application) {
-    this.app = app
+  public get turns(): number {
+    return this.turnsCount
+  }
+  
+  public get points(): number {
+    return this.pointsCount
+  }
+  
+  private incrementTurnsCount() {
+    this.turnsCount++
+  }
+  
+  private setPoints(points: number) {
+    this.pointsCount += points
+  }
+  
+  constructor(quantity: number) {
     this.blocksQuantity = quantity
     const position: IPosition = {
       x: 1,
@@ -28,6 +44,7 @@ export class StateService implements IStateService {
       return {
         color: blockColors[randomIntFromInterval(0, blockColors.length - 1)],
         position: currentPosition,
+        empty: false
       }
     })
   }
@@ -56,7 +73,7 @@ export class StateService implements IStateService {
     })
   }
   
-  private getRLeft(block: IBlock) {
+  private getLeft(block: IBlock) {
     return this.blocksList.find((b) => {
       return block.position.x === b.position.x - 1
         && b.position.y === block.position.y
@@ -65,78 +82,115 @@ export class StateService implements IStateService {
   }
   
   
-  private compareBlocksPositions(target: IBlock, source: IBlock): boolean {
+  private isEqualBlocksPositions(target: IBlock, source: IBlock): boolean {
     return target.position.x === source.position.x
       && target.position.y === source.position.y
   }
   
-  public async onClickBlock(originalBlock: IBlock) {
-    const blocksAround: IBlock[] = []
+  private existsBlockForDelete(block: IBlock) {
+    return this.blocksAround.some((b) => {
+      return block.position.x === b.position.x
+        && block.position.y === b.position.y
+    })
+  }
+  
+  public clearRelatedBlocksList() {
+    this.blocksAround = []
+  }
+  
+  public async onBlockClick(block: IBlock): Promise<void> {
+    try {
+      const res = await this.onTryToBlast(block)
+      const success = Boolean(res?.length)
+      if (success) {
+        this.setPoints(res.length)
+      }
+      this.incrementTurnsCount()
+      return success ? Promise.resolve() : Promise.reject()
+    } catch (e) {
+      console.error(e)
+    }
+  }
+  
+  private async findRelatedBlocks(direction: BlockDirection, block: IBlock) {
+    switch (direction) {
+      case "top":
+        if (block) {
+          if (this.existsBlockForDelete(block)) {
+            break
+          }
+          const nextIterationBlocks = await this.onTryToBlast(block, 'bottom')
+          if (!nextIterationBlocks?.length) {
+            break
+          }
+        }
+        break
+      case "bottom":
+        if (block) {
+          if (this.existsBlockForDelete(block)) {
+            break
+          }
+          const nextIterationBlocks = await this.onTryToBlast(block, 'top')
+          if (!nextIterationBlocks?.length) {
+            break
+          }
+        }
+        break
+      case "right":
+        if (block) {
+          if (this.existsBlockForDelete(block)) {
+            break
+          }
+          const nextIterationBlocks = await this.onTryToBlast(block, 'left')
+          if (!nextIterationBlocks?.length) {
+            break
+          }
+        }
+        break
+      case "left":
+        if (block) {
+          if (this.existsBlockForDelete(block)) {
+            break
+          }
+          const nextIterationBlocks = await this.onTryToBlast(block, 'right')
+          if (!nextIterationBlocks?.length) {
+            break
+          }
+        }
+    }
+  }
+  
+  private async onTryToBlast(originalBlock: IBlock, excludeDirection: BlockDirection = null) {
     const top = this.getTop(originalBlock)
-    if (top) {
-      blocksAround.push(top)
-      let upperTop = this.getTop(top)
-      while (upperTop) {
-        blocksAround.push(upperTop)
-        upperTop = this.getTop(upperTop)
-      }
-    }
-    
     const right = this.getRight(originalBlock)
-    
-    if (right) {
-      blocksAround.push(right)
-      let furtherRight = this.getRight(right)
-      while (furtherRight) {
-        blocksAround.push(furtherRight)
-        furtherRight = this.getRight(furtherRight)
-      }
-    }
-    
-    const left = this.getRLeft(originalBlock)
-    
-    if (left) {
-      blocksAround.push(left)
-      let furtherLeft = this.getRLeft(left)
-      while (furtherLeft) {
-        blocksAround.push(furtherLeft)
-        furtherLeft = this.getRLeft(furtherLeft)
-      }
-    }
-    
+    const left = this.getLeft(originalBlock)
     const bottom = this.getBottom(originalBlock)
     
-    if (bottom) {
-      blocksAround.push(bottom)
-      let furtherBottom = this.getBottom(bottom)
-      while (furtherBottom) {
-        blocksAround.push(furtherBottom)
-        furtherBottom = this.getBottom(furtherBottom)
-      }
+    const foundOriginal = this.blocksList.find((b) =>
+      this.isEqualBlocksPositions(b, originalBlock))
+    
+    if (foundOriginal) {
+      this.blocksAround.push(foundOriginal)
     }
     
-    const foundSource = this.blocksList.find((b) => {
-      return this.compareBlocksPositions(b, originalBlock)
-    })
+    if (excludeDirection !== 'top') await this.findRelatedBlocks('top', top)
+    if (excludeDirection !== 'right') await this.findRelatedBlocks('right', right)
+    if (excludeDirection !== 'bottom') await this.findRelatedBlocks('bottom', bottom)
+    if (excludeDirection !== 'left') await this.findRelatedBlocks('left', left)
     
-    if (foundSource) {
-      blocksAround.push(foundSource)
-    }
-    
-    if (blocksAround.length < BLASTED_BLOCKS_COUNT) {
+    if (this.blocksAround.length < BLASTED_BLOCKS_COUNT) {
       return
     }
     
-    blocksAround.forEach((blockAround) => {
-      const found = this.blocksList.find((b) => {
-        return this.compareBlocksPositions(b, blockAround)
-      })
+    this.blocksAround.forEach((blockAround) => {
+      const found = this.blocksList.find((b) =>
+        this.isEqualBlocksPositions(b, blockAround))
       
       if (found) {
-        const index = this.blocksList.indexOf(found)
-        this.blocksList.splice(index, 1)
+        found.empty = true
       }
     })
-    await renderMainField()
+    
+    return this.blocksAround
   }
 }

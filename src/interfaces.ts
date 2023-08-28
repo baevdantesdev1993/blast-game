@@ -13,6 +13,7 @@ export interface IPosition {
 export interface IBlock {
   color: BlockColor,
   position: IPosition,
+  empty: boolean
 }
 
 export interface IStateService {

@@ -9,3 +9,6 @@ export const BLOCKS_QUANTITY = BLOCKS_IN_ROW * BLOCKS_IN_COLUMN
 
 export const BLASTED_BLOCKS_COUNT = 2
 
+export const MAX_TURNS = 10
+export const WIN_POINTS = 30
+

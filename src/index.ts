@@ -13,7 +13,7 @@ export const app = new Application<HTMLCanvasElement>({
 
 document.getElementById('app').appendChild(app.view);
 
-export const state = new StateService(BLOCKS_QUANTITY, app)
+export const state = new StateService(BLOCKS_QUANTITY)
 
 export const renderMainField = async () => {
   await new MainFieldComponent(
