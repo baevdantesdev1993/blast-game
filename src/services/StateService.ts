@@ -105,10 +105,11 @@ export class StateService implements IStateService {
       if (success) {
         this.setPoints(res.length)
       }
-      this.incrementTurnsCount()
       return success ? Promise.resolve() : Promise.reject()
     } catch (e) {
       console.error(e)
+    } finally {
+      this.incrementTurnsCount()
     }
   }
   

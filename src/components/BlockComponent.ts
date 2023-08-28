@@ -2,7 +2,7 @@ import blocksMap from "../utils/blocksMap";
 import {IBaseComponent, IBlock} from "../interfaces";
 import {BLOCK_SIZE} from "../constants";
 import {Assets, Sprite} from "pixi.js";
-import {renderApp, state} from "../index";
+import {renderApp, renderTurnsDisplay, state} from "../index";
 
 export default class BlockComponent implements IBaseComponent {
   private readonly image: HTMLImageElement
@@ -23,6 +23,7 @@ export default class BlockComponent implements IBaseComponent {
     
     } finally {
       state.clearRelatedBlocksList()
+      renderTurnsDisplay(true)
     }
   }
   

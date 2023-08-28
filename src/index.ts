@@ -9,7 +9,7 @@ import TurnsDisplay from "./components/TurnsDisplay";
 
 export const app = new Application<HTMLCanvasElement>({
   background: '#bebebe',
-  resizeTo: window
+  resizeTo: window,
 });
 
 document.getElementById('app').appendChild(app.view);
@@ -44,6 +44,15 @@ const destroyBlockInstances = () => {
 const startX = (app.renderer.width / 2) - FIELD_SIZE / 2 + FIELD_PADDING - BLOCK_SIZE
 const startY = (app.renderer.height / 2) - FIELD_SIZE / 2 + FIELD_PADDING - BLOCK_SIZE
 
+export const renderTurnsDisplay = (reRender = false) => {
+  if (reRender) {
+    turnsDisplayInstance.destroy()
+  }
+  
+  setTurnsDisplayInstance()
+  
+  app.stage.addChild(turnsDisplayInstance)
+}
 
 export const renderApp = async (reRender = false) => {
   const mainFieldSprite = await new FieldComponent().render()
@@ -55,16 +64,15 @@ export const renderApp = async (reRender = false) => {
   
   const blocks: BlockComponent[] = state.blocksList.map((b) => new BlockComponent(b))
   
+  renderTurnsDisplay(reRender)
+  
   if (reRender) {
     pointerDisplayInstance.destroy()
-    turnsDisplayInstance.destroy()
     destroyBlockInstances()
   }
   setPointsDisplayInstance()
-  setTurnsDisplayInstance()
   setBlockInstances(blocks)
   app.stage.addChild(pointerDisplayInstance)
-  app.stage.addChild(turnsDisplayInstance)
 };
 
-(async () => await renderApp())()
+renderApp();
