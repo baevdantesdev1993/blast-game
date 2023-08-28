@@ -2,7 +2,7 @@ import blocksMap from "../utils/blocksMap";
 import {IBaseComponent, IBlock} from "../interfaces";
 import {BLOCK_SIZE} from "../constants";
 import {Assets, Sprite} from "pixi.js";
-import {renderMainField, state} from "../index";
+import {renderApp, state} from "../index";
 
 export default class BlockComponent implements IBaseComponent {
   private readonly image: HTMLImageElement
@@ -16,10 +16,9 @@ export default class BlockComponent implements IBaseComponent {
   }
   
   private async onClick() {
-    console.log(this.block)
     try {
       await state.onBlockClick(this.block)
-      await renderMainField()
+      await renderApp(true)
     } catch (e) {
     
     } finally {
@@ -47,8 +46,8 @@ export default class BlockComponent implements IBaseComponent {
     const texture = await Assets.load(this.image.src);
     this.sprite = new Sprite(texture);
     if (!this.block.empty) {
-      this.sprite.cursor = 'pointer'
       this.sprite.eventMode = 'static'
+      this.sprite.cursor = 'pointer'
       this.sprite.on('click', this.onClick, this)
       this.sprite.on('pointerover', this.onPointerOver, this)
       this.sprite.on('pointerleave', this.onPointerLeave, this)

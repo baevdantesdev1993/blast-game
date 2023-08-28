@@ -1,9 +1,10 @@
-import {Application} from "pixi.js";
+import {Application, Sprite, Text} from "pixi.js";
 import FieldComponent from "./components/FieldComponent";
-import MainFieldComponent from "./components/MainFieldComponent";
 import BlockComponent from "./components/BlockComponent";
 import {StateService} from "./services/StateService";
-import {BLOCKS_QUANTITY} from "./constants";
+import {BLOCK_SIZE, BLOCKS_QUANTITY, FIELD_PADDING, FIELD_SIZE} from "./constants";
+import PointsDisplay from "./components/PointsDisplay";
+import TurnsDisplay from "./components/TurnsDisplay";
 
 
 export const app = new Application<HTMLCanvasElement>({
@@ -14,12 +15,56 @@ export const app = new Application<HTMLCanvasElement>({
 document.getElementById('app').appendChild(app.view);
 
 export const state = new StateService(BLOCKS_QUANTITY)
-
-export const renderMainField = async () => {
-  await new MainFieldComponent(
-    new FieldComponent(),
-    state.blocksList.map((b) => new BlockComponent(b)),
-    app).render()
+let pointerDisplayInstance: Text;
+let turnsDisplayInstance: Text;
+let blockInstances: Sprite[] = [];
+const setPointsDisplayInstance = () => {
+  pointerDisplayInstance = new PointsDisplay(app).render();
 }
 
-renderMainField()
+const setTurnsDisplayInstance = () => {
+  turnsDisplayInstance = new TurnsDisplay(app).render();
+}
+
+const setBlockInstances = (blocks: BlockComponent[]) => {
+  blocks.forEach(async (b) => {
+    const renderBlock = await b.render();
+    renderBlock.x = startX + (b.block.position.x * BLOCK_SIZE)
+    renderBlock.y = startY + (b.block.position.y * BLOCK_SIZE)
+    app.stage.addChild(renderBlock);
+    blockInstances.push(renderBlock)
+  })
+}
+
+const destroyBlockInstances = () => {
+  blockInstances.forEach((b) => b.destroy())
+  blockInstances = []
+}
+
+const startX = (app.renderer.width / 2) - FIELD_SIZE / 2 + FIELD_PADDING - BLOCK_SIZE
+const startY = (app.renderer.height / 2) - FIELD_SIZE / 2 + FIELD_PADDING - BLOCK_SIZE
+
+
+export const renderApp = async (reRender = false) => {
+  const mainFieldSprite = await new FieldComponent().render()
+  mainFieldSprite.x = app.renderer.width / 2;
+  mainFieldSprite.y = app.renderer.height / 2;
+  mainFieldSprite.anchor.x = 0.5;
+  mainFieldSprite.anchor.y = 0.5;
+  app.stage.addChild(mainFieldSprite);
+  
+  const blocks: BlockComponent[] = state.blocksList.map((b) => new BlockComponent(b))
+  
+  if (reRender) {
+    pointerDisplayInstance.destroy()
+    turnsDisplayInstance.destroy()
+    destroyBlockInstances()
+  }
+  setPointsDisplayInstance()
+  setTurnsDisplayInstance()
+  setBlockInstances(blocks)
+  app.stage.addChild(pointerDisplayInstance)
+  app.stage.addChild(turnsDisplayInstance)
+};
+
+(async () => await renderApp())()

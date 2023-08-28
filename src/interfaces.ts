@@ -2,7 +2,7 @@ import {BlockColor} from "./utils/blocksMap";
 import {Sprite} from "pixi.js";
 
 export interface IBaseComponent {
-  render: () => Promise<Sprite>
+  render: () => Promise<Sprite> | Sprite
 }
 
 export interface IPosition {
