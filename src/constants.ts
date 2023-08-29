@@ -14,3 +14,11 @@ export const WIN_POINTS = BLASTED_BLOCKS_COUNT * 10
 
 export const PADDING_TOP = 20
 
+export const PROGRESS_BAR_WIDTH  = 200
+
+// colors
+
+export const GREEN_COLOR = '#509332'
+export const RED_COLOR = '#dc3b57'
+export const GREY_COLOR = '#ededed'
+

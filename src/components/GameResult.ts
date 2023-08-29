@@ -1,6 +1,6 @@
 import {IBaseComponent} from "../interfaces";
 import {Application, Text, TextStyle} from "pixi.js";
-import {PADDING_TOP} from "../constants";
+import {GREEN_COLOR, PADDING_TOP, RED_COLOR} from "../constants";
 
 export default class GameResult implements IBaseComponent {
   private app: Application
@@ -16,7 +16,7 @@ export default class GameResult implements IBaseComponent {
   
   public render(success = true) {
     const style = new TextStyle({
-      fill: success ? 'green' : 'red'
+      fill: success ? GREEN_COLOR : RED_COLOR
     })
     this.text = new Text(success ? 'Win!' : 'Loss :-(')
     this.text.x = this.app.renderer.width / 2 - this.text.width / 2

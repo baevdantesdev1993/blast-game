@@ -12,6 +12,8 @@ export const app = new Application<HTMLCanvasElement>({
   background: '#bebebe',
   resizeTo: window,
 });
+const startX = (app.renderer.width / 2) - FIELD_SIZE / 2 + FIELD_PADDING - BLOCK_SIZE
+const startY = (app.renderer.height / 2) - FIELD_SIZE / 2 + FIELD_PADDING - BLOCK_SIZE
 
 document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('app').appendChild(app.view);
@@ -38,9 +40,6 @@ const destroyBlockInstances = () => {
   blockInstances = []
 }
 
-const startX = (app.renderer.width / 2) - FIELD_SIZE / 2 + FIELD_PADDING - BLOCK_SIZE
-const startY = (app.renderer.height / 2) - FIELD_SIZE / 2 + FIELD_PADDING - BLOCK_SIZE
-
 export const gameResult = new GameResult(app)
 
 export const renderResult = (success: boolean) => {
@@ -48,13 +47,7 @@ export const renderResult = (success: boolean) => {
 }
 
 export const renderApp = async (reRender = false) => {
-  const mainFieldSprite = await new FieldComponent().render()
-  mainFieldSprite.x = app.renderer.width / 2;
-  mainFieldSprite.y = app.renderer.height / 2;
-  mainFieldSprite.anchor.x = 0.5;
-  mainFieldSprite.anchor.y = 0.5;
-  app.stage.addChild(mainFieldSprite);
-  
+  await new FieldComponent(app).render()
   const blocks: BlockComponent[] = state.blocksList.map((b) => new BlockComponent(b))
   
   if (reRender) {
