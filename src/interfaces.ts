@@ -14,7 +14,8 @@ export interface IPosition {
 export interface IBlock {
   color: BlockColor,
   position: IPosition,
-  empty: boolean
+  empty: boolean,
+  superBoost: boolean
 }
 
 export interface IStateService {

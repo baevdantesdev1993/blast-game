@@ -52,7 +52,7 @@ export default class FieldComponent implements IBaseComponent {
   
   private renderBlocks() {
     this.state.blocksList.forEach(async (item) => {
-      const component = new BlockComponent(item, this.app, this)
+      const component = new BlockComponent(item, this.app, this.onBlockClick)
       await component.render()
       this.blocks.push(component)
     })

@@ -22,3 +22,5 @@ export const GREEN_COLOR = '#509332'
 export const RED_COLOR = '#dc3b57'
 export const GREY_COLOR = '#ededed'
 
+export const SUPER_BOOST_RADIUS = 1
+

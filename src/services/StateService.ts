@@ -2,6 +2,7 @@ import {IBlock, IPosition, IStateService} from "../interfaces";
 import {BLASTED_BLOCKS_COUNT, BLOCKS_IN_COLUMN, BLOCKS_IN_ROW, MAX_TURNS, WIN_POINTS} from "../constants";
 import {BlockDirection, WinStatus} from "../types";
 import getRandomBlockColor from "../utils/getRandomBlockColor";
+import getSuperBoostRandom from "../utils/getSuperBoostRandom";
 
 export class StateService implements IStateService {
   public blocksQuantity: number = 0
@@ -39,6 +40,7 @@ export class StateService implements IStateService {
                 y: yPositionForAdding
               },
               color: getRandomBlockColor(),
+              superBoost: getSuperBoostRandom(),
               empty: false
             })
             yPositionForAdding++
@@ -67,9 +69,12 @@ export class StateService implements IStateService {
       return {
         color: getRandomBlockColor(),
         position: currentPosition,
+        superBoost: getSuperBoostRandom(),
         empty: false
       }
     })
+    
+    console.log(this.blocksList.filter(b => b.superBoost))
     
     return this.blocksList
   }

@@ -2,8 +2,6 @@ import blocksMap from "../utils/blocksMap";
 import {IBaseComponent, IBlock} from "../interfaces";
 import {BLOCK_SIZE, FIELD_PADDING, FIELD_SIZE} from "../constants";
 import {Application, Assets, Sprite} from "pixi.js";
-import {pointsDisplayInstance, renderApp, renderResult, state, turnsDisplayInstance} from "../index";
-import FieldComponent from "./FieldComponent";
 
 export default class BlockComponent implements IBaseComponent {
   private readonly image: HTMLImageElement
@@ -12,20 +10,22 @@ export default class BlockComponent implements IBaseComponent {
   private app: Application
   private readonly startX: number
   private readonly startY: number
-  private parent: FieldComponent
+  private readonly onClickCallback: (block: BlockComponent) => void
   
-  constructor(block: IBlock, app: Application, parent: FieldComponent) {
+  constructor(block: IBlock,
+              app: Application,
+              onClickCallBack: (block: BlockComponent) => void) {
     this.image = new Image(BLOCK_SIZE, BLOCK_SIZE)
     this.image.src = blocksMap[block.color]
     this.block = block
     this.app = app
-    this.parent = parent
+    this.onClickCallback = onClickCallBack
     this.startY = (this.app.renderer.height / 2) - FIELD_SIZE / 2 + FIELD_PADDING - BLOCK_SIZE
     this.startX = (this.app.renderer.width / 2) - FIELD_SIZE / 2 + FIELD_PADDING - BLOCK_SIZE
   }
   
   private async onClick() {
-    await this.parent.onBlockClick(this)
+    await this.onClickCallback(this)
   }
   
   private onMouseDown() {
@@ -73,6 +73,9 @@ export default class BlockComponent implements IBaseComponent {
     } else {
       this.sprite.width = BLOCK_SIZE
       this.sprite.height = BLOCK_SIZE
+    }
+    if (this.block.superBoost) {
+      this.sprite.tint = 0x068554
     }
     this.app.stage.addChild(this.sprite)
   }
