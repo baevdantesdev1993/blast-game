@@ -1,14 +1,41 @@
 import {IBaseComponent} from "../interfaces";
 import FieldImage from '../assets/field.png'
-import {FIELD_SIZE} from "../constants";
+import {BLOCK_SIZE, FIELD_PADDING, FIELD_SIZE} from "../constants";
 import {Application, Assets, Sprite} from "pixi.js";
+import {StateService} from "../services/StateService";
+import BlockComponent from "./BlockComponent";
 
 export default class FieldComponent implements IBaseComponent {
-  private app: Application
+  private readonly app: Application
   private object: Sprite
+  private state: StateService
+  private readonly startX: number
+  private readonly startY: number
+  private blocks: BlockComponent[] = []
   
-  constructor(app: Application) {
+  constructor(app: Application, state: StateService) {
     this.app = app
+    this.state = state
+    this.startY = (this.app.renderer.height / 2) - FIELD_SIZE / 2 + FIELD_PADDING - BLOCK_SIZE
+    this.startX = (this.app.renderer.width / 2) - FIELD_SIZE / 2 + FIELD_PADDING - BLOCK_SIZE
+  }
+  
+  public destroy() {
+    this.blocks.forEach((b) => b.destroy())
+    this.blocks = []
+  }
+  
+  public async reRender() {
+    this.destroy()
+    await this.renderBlocks()
+  }
+  
+  private renderBlocks() {
+    this.state.blocksList.forEach(async (item) => {
+      const component = new BlockComponent(item, this.app)
+      await component.render()
+      this.blocks.push(component)
+    })
   }
   
   public async render() {
@@ -25,6 +52,6 @@ export default class FieldComponent implements IBaseComponent {
     this.object.anchor.y = 0.5;
     this.app.stage.addChild(this.object);
     
-    return this.object
+    this.renderBlocks()
   }
 }

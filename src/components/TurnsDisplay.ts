@@ -54,6 +54,5 @@ export default class TurnsDisplay implements IBaseComponent {
       - this.text.width
     this.text.y = PADDING_TOP
     this.app.stage.addChild(this.text)
-    return this.text
   }
 }

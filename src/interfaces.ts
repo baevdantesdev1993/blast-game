@@ -1,8 +1,9 @@
 import {BlockColor} from "./utils/blocksMap";
-import {DisplayObject, Sprite} from "pixi.js";
 
 export interface IBaseComponent {
-  render: () => Promise<Sprite> | Sprite
+  render: () => Promise<void> | void
+  reRender: () => Promise<void> | void
+  destroy: () => Promise<void> | void
 }
 
 export interface IPosition {

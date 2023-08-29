@@ -14,6 +14,11 @@ export default class GameResult implements IBaseComponent {
     this.text.destroy()
   }
   
+  public reRender(success = true) {
+    this.destroy()
+    this.render(success)
+  }
+  
   public render(success = true) {
     const style = new TextStyle({
       fill: success ? GREEN_COLOR : RED_COLOR
@@ -26,6 +31,5 @@ export default class GameResult implements IBaseComponent {
     setTimeout(() => {
       this.destroy()
     }, 2000)
-    return this.text
   }
 }

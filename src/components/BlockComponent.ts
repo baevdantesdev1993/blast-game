@@ -1,18 +1,24 @@
 import blocksMap from "../utils/blocksMap";
 import {IBaseComponent, IBlock} from "../interfaces";
-import {BLOCK_SIZE} from "../constants";
-import {Assets, Sprite} from "pixi.js";
+import {BLOCK_SIZE, FIELD_PADDING, FIELD_SIZE} from "../constants";
+import {Application, Assets, Sprite} from "pixi.js";
 import {pointsDisplayInstance, renderApp, renderResult, state, turnsDisplayInstance} from "../index";
 
 export default class BlockComponent implements IBaseComponent {
   private readonly image: HTMLImageElement
   private sprite: Sprite
   public block: IBlock
+  private app: Application
+  private readonly startX: number
+  private readonly startY: number
   
-  constructor(block: IBlock) {
+  constructor(block: IBlock, app: Application) {
     this.image = new Image(BLOCK_SIZE, BLOCK_SIZE)
     this.image.src = blocksMap[block.color]
     this.block = block
+    this.app = app
+    this.startY = (this.app.renderer.height / 2) - FIELD_SIZE / 2 + FIELD_PADDING - BLOCK_SIZE
+    this.startX = (this.app.renderer.width / 2) - FIELD_SIZE / 2 + FIELD_PADDING - BLOCK_SIZE
   }
   
   private async onClick() {
@@ -50,9 +56,20 @@ export default class BlockComponent implements IBaseComponent {
     this.sprite.alpha = 1
   }
   
+  public destroy() {
+    this.sprite.destroy()
+  }
+  
+  public async reRender() {
+    this.destroy()
+    await this.render()
+  }
+  
   public async render() {
     const texture = await Assets.load(this.image.src);
     this.sprite = new Sprite(texture);
+    this.sprite.x = this.startX + (this.block.position.x * BLOCK_SIZE)
+    this.sprite.y = this.startY + (this.block.position.y * BLOCK_SIZE)
     if (!this.block.empty) {
       this.sprite.eventMode = 'static'
       this.sprite.cursor = 'pointer'
@@ -69,6 +86,6 @@ export default class BlockComponent implements IBaseComponent {
       this.sprite.width = BLOCK_SIZE
       this.sprite.height = BLOCK_SIZE
     }
-    return this.sprite
+    this.app.stage.addChild(this.sprite)
   }
 }

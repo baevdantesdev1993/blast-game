@@ -51,6 +51,5 @@ export default class PointsDisplay implements IBaseComponent {
     this.text.x = (this.app.renderer.width / 2) - FIELD_SIZE / 2 + FIELD_PADDING
     this.text.y = PADDING_TOP
     this.app.stage.addChild(this.text)
-    return this.text
   }
 }
