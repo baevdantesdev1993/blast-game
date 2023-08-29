@@ -1,34 +1,57 @@
 import {IBlock, IPosition, IStateService} from "../interfaces";
-import {blockColors} from "../utils/blocksMap";
-import {randomIntFromInterval} from "../utils/randomIntFromInterval";
-import {BLASTED_BLOCKS_COUNT, BLOCKS_IN_ROW} from "../constants";
-import {BlockDirection} from "../types";
+import {BLASTED_BLOCKS_COUNT, BLOCKS_IN_COLUMN, BLOCKS_IN_ROW, MAX_TURNS, WIN_POINTS} from "../constants";
+import {BlockDirection, WinStatus} from "../types";
+import getRandomBlockColor from "../utils/getRandomBlockColor";
 
 export class StateService implements IStateService {
   public blocksQuantity: number = 0
   public blocksList: IBlock[] = []
   private blocksAround: IBlock[] = []
-  private turnsCount: number = 0
+  private turnsCount: number = MAX_TURNS
   private pointsCount: number = 0
-  
-  public get turns(): number {
-    return this.turnsCount
-  }
-  
-  public get points(): number {
-    return this.pointsCount
-  }
-  
-  private incrementTurnsCount() {
-    this.turnsCount++
-  }
-  
-  private setPoints(points: number) {
-    this.pointsCount += points
-  }
   
   constructor(quantity: number) {
     this.blocksQuantity = quantity
+    this.generateBlocks()
+  }
+  
+  private moveDownBlocksToEmptyCells() {
+    this.reversedColumns.forEach((column) => {
+      let emptyFlowLength = 0
+      let emptyFlow = false
+      let yPositionForAdding = 1
+      column.forEach((block) => {
+        if (block.empty) {
+          if (!emptyFlow) {
+            emptyFlow = true
+          }
+          emptyFlowLength++
+          const found = this.findBlockByPos(
+            {x: block.position.x, y: block.position.y}
+          )
+          
+          if (found && found.empty) {
+            const index = this.blocksList.indexOf(found)
+            this.blocksList.splice(index, 1)
+            this.blocksList.push({
+              position: {
+                x: block.position.x,
+                y: yPositionForAdding
+              },
+              color: getRandomBlockColor(),
+              empty: false
+            })
+            yPositionForAdding++
+          }
+        } else {
+          emptyFlow = false
+          block.position.y = block.position.y + emptyFlowLength
+        }
+      })
+    })
+  }
+  
+  public generateBlocks() {
     const position: IPosition = {
       x: 1,
       y: 1
@@ -42,11 +65,49 @@ export class StateService implements IStateService {
         position.x++
       }
       return {
-        color: blockColors[randomIntFromInterval(0, blockColors.length - 1)],
+        color: getRandomBlockColor(),
         position: currentPosition,
         empty: false
       }
     })
+    
+    return this.blocksList
+  }
+  
+  public get turns(): number {
+    return this.turnsCount
+  }
+  
+  public get points(): number {
+    return this.pointsCount
+  }
+  
+  private decrementTurnsCount() {
+    this.turnsCount--
+  }
+  
+  private get columns(): IBlock[][] {
+    const arr: IBlock[][] = []
+    for (let x = 1; x <= BLOCKS_IN_COLUMN; x++) {
+      const nestedArr: IBlock[] = []
+      for (let y = 1; y <= BLOCKS_IN_ROW; y++) {
+        const found = this.findBlockByPos({x, y})
+        if (found) {
+          nestedArr.push(found)
+        }
+      }
+      arr.push(nestedArr)
+    }
+    
+    return arr
+  }
+  
+  private get reversedColumns(): IBlock[][] {
+    return this.columns.map((c) => c.reverse())
+  }
+  
+  private setPoints(points: number) {
+    this.pointsCount += points
   }
   
   private getTop(block: IBlock) {
@@ -94,23 +155,44 @@ export class StateService implements IStateService {
     })
   }
   
+  private findBlockByPos(pos: IPosition): IBlock {
+    return this.blocksList.find((b) =>
+      b.position.x === pos.x
+      && b.position.y === pos.y)
+  }
+  
   public clearRelatedBlocksList() {
     this.blocksAround = []
   }
   
-  public async onBlockClick(block: IBlock): Promise<void> {
+  public async onBlockClick(block: IBlock): Promise<WinStatus> {
+    this.decrementTurnsCount()
     try {
       const res = await this.onTryToBlast(block)
       const success = Boolean(res?.length)
       if (success) {
         this.setPoints(res.length)
+        this.moveDownBlocksToEmptyCells()
       }
-      return success ? Promise.resolve() : Promise.reject()
+      const winStatus = this.getWinStatus()
+      if (winStatus !== 'progress') {
+        this.pointsCount = 0
+        this.turnsCount = MAX_TURNS
+      }
+      return winStatus
     } catch (e) {
       console.error(e)
-    } finally {
-      this.incrementTurnsCount()
     }
+  }
+  
+  private getWinStatus(): WinStatus {
+    if (this.points >= WIN_POINTS && this.turns >= 0) {
+      return 'win'
+    }
+    if (this.turns === 0 && this.points < WIN_POINTS) {
+      return 'loss'
+    }
+    return 'progress'
   }
   
   private async findRelatedBlocks(direction: BlockDirection, block: IBlock) {

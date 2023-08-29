@@ -2,7 +2,7 @@ import blocksMap from "../utils/blocksMap";
 import {IBaseComponent, IBlock} from "../interfaces";
 import {BLOCK_SIZE} from "../constants";
 import {Assets, Sprite} from "pixi.js";
-import {renderApp, renderTurnsDisplay, state} from "../index";
+import {pointsDisplayInstance, renderApp, renderResult, state, turnsDisplayInstance} from "../index";
 
 export default class BlockComponent implements IBaseComponent {
   private readonly image: HTMLImageElement
@@ -17,13 +17,20 @@ export default class BlockComponent implements IBaseComponent {
   
   private async onClick() {
     try {
-      await state.onBlockClick(this.block)
+      const res = await state.onBlockClick(this.block)
       await renderApp(true)
+      if (res === 'loss') {
+        renderResult(false)
+      }
+      if (res === 'win') {
+        renderResult(true)
+      }
     } catch (e) {
     
     } finally {
       state.clearRelatedBlocksList()
-      renderTurnsDisplay(true)
+      pointsDisplayInstance.reRender()
+      turnsDisplayInstance.reRender()
     }
   }
   

@@ -1,5 +1,5 @@
 import {BlockColor} from "./utils/blocksMap";
-import {Sprite} from "pixi.js";
+import {DisplayObject, Sprite} from "pixi.js";
 
 export interface IBaseComponent {
   render: () => Promise<Sprite> | Sprite
