@@ -4,6 +4,7 @@ import {BLOCK_SIZE, FIELD_PADDING, FIELD_SIZE} from "../constants";
 import {Application, Assets, Sprite} from "pixi.js";
 import {StateService} from "../services/StateService";
 import BlockComponent from "./BlockComponent";
+import {pointsDisplayInstance, renderApp, renderResult, state, turnsDisplayInstance} from "../index";
 
 export default class FieldComponent implements IBaseComponent {
   private readonly app: Application
@@ -12,6 +13,25 @@ export default class FieldComponent implements IBaseComponent {
   private readonly startX: number
   private readonly startY: number
   private blocks: BlockComponent[] = []
+  
+  public async onBlockClick(block: BlockComponent) {
+    try {
+      const res = await state.onBlockClick(block.block)
+      await renderApp(true)
+      if (res === 'loss') {
+        renderResult(false)
+      }
+      if (res === 'win') {
+        renderResult(true)
+      }
+    } catch (e) {
+    
+    } finally {
+      state.clearRelatedBlocksList()
+      pointsDisplayInstance.reRender()
+      turnsDisplayInstance.reRender()
+    }
+  }
   
   constructor(app: Application, state: StateService) {
     this.app = app
@@ -32,7 +52,7 @@ export default class FieldComponent implements IBaseComponent {
   
   private renderBlocks() {
     this.state.blocksList.forEach(async (item) => {
-      const component = new BlockComponent(item, this.app)
+      const component = new BlockComponent(item, this.app, this)
       await component.render()
       this.blocks.push(component)
     })

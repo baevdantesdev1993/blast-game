@@ -3,6 +3,7 @@ import {IBaseComponent, IBlock} from "../interfaces";
 import {BLOCK_SIZE, FIELD_PADDING, FIELD_SIZE} from "../constants";
 import {Application, Assets, Sprite} from "pixi.js";
 import {pointsDisplayInstance, renderApp, renderResult, state, turnsDisplayInstance} from "../index";
+import FieldComponent from "./FieldComponent";
 
 export default class BlockComponent implements IBaseComponent {
   private readonly image: HTMLImageElement
@@ -11,33 +12,20 @@ export default class BlockComponent implements IBaseComponent {
   private app: Application
   private readonly startX: number
   private readonly startY: number
+  private parent: FieldComponent
   
-  constructor(block: IBlock, app: Application) {
+  constructor(block: IBlock, app: Application, parent: FieldComponent) {
     this.image = new Image(BLOCK_SIZE, BLOCK_SIZE)
     this.image.src = blocksMap[block.color]
     this.block = block
     this.app = app
+    this.parent = parent
     this.startY = (this.app.renderer.height / 2) - FIELD_SIZE / 2 + FIELD_PADDING - BLOCK_SIZE
     this.startX = (this.app.renderer.width / 2) - FIELD_SIZE / 2 + FIELD_PADDING - BLOCK_SIZE
   }
   
   private async onClick() {
-    try {
-      const res = await state.onBlockClick(this.block)
-      await renderApp(true)
-      if (res === 'loss') {
-        renderResult(false)
-      }
-      if (res === 'win') {
-        renderResult(true)
-      }
-    } catch (e) {
-    
-    } finally {
-      state.clearRelatedBlocksList()
-      pointsDisplayInstance.reRender()
-      turnsDisplayInstance.reRender()
-    }
+    await this.parent.onBlockClick(this)
   }
   
   private onMouseDown() {
