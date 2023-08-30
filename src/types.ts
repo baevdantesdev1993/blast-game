@@ -1,3 +1,3 @@
 export type BlockDirection = 'top' | 'right' | 'bottom' | 'left'
 
-export type WinStatus = 'progress' | 'win' | 'loss' | 'mix'
+export type GameStatus = 'progress' | 'win' | 'loss' | 'mix'

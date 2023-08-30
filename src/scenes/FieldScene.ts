@@ -4,7 +4,7 @@ import {BLOCK_SIZE, FIELD_PADDING, FIELD_SIZE} from "../constants";
 import {Application, Assets, Sprite} from "pixi.js";
 import {GameModel} from "../models/GameModel";
 import BlockScene from "./BlockScene";
-import {gameModel, pointsDisplayScene, renderApp, renderResult, turnsDisplayScene} from "../index";
+import {gameModel, pointsDisplayScene, renderResult, turnsDisplayScene} from "../index";
 
 export default class FieldScene implements IBaseComponent {
   private readonly app: Application
@@ -28,8 +28,8 @@ export default class FieldScene implements IBaseComponent {
   
   public async onBlockClick(block: BlockScene) {
     try {
-      const res = await gameModel.onBlockClick(block.block)
-      await renderApp(true)
+      const res = gameModel.onBlockClick(block.block)
+      await this.reRender()
       if (res === 'loss') {
         renderResult(false)
         await this.reGenerateField()

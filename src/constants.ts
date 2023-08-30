@@ -11,9 +11,9 @@ export const BLOCKS_QUANTITY = BLOCKS_IN_ROW * BLOCKS_IN_COLUMN
 // --- main settings for game ---
 export const SUPER_BOOST_RADIUS = 1
 export const MAX_MIXES = 3
-export const BLASTED_BLOCKS_COUNT = 2
-export const MAX_TURNS = BLASTED_BLOCKS_COUNT * 5
-export const WIN_POINTS = BLASTED_BLOCKS_COUNT * 10
+export const BLASTED_BLOCKS_COUNT = 3
+export const MAX_TURNS = BLASTED_BLOCKS_COUNT * 5 + 100
+export const WIN_POINTS = BLASTED_BLOCKS_COUNT * 10 + 100
 // --- main settings for game ---
 
 export const PADDING_TOP = 20

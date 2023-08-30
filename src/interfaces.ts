@@ -23,3 +23,8 @@ export interface IStateService {
   blocksList: IBlock[]
 }
 
+export interface IBlastResult {
+  isChecking: boolean,
+  result: IBlock[]
+}
+

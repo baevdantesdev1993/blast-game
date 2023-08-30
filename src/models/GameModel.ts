@@ -1,13 +1,14 @@
-import {IBlock, IPosition, IStateService} from "../interfaces";
+import {IBlastResult, IBlock, IPosition, IStateService} from "../interfaces";
 import {
   BLASTED_BLOCKS_COUNT,
   BLOCKS_IN_COLUMN,
-  BLOCKS_IN_ROW, MAX_MIXES,
+  BLOCKS_IN_ROW,
+  MAX_MIXES,
   MAX_TURNS,
   SUPER_BOOST_RADIUS,
   WIN_POINTS
 } from "../constants";
-import {BlockDirection, WinStatus} from "../types";
+import {BlockDirection, GameStatus} from "../types";
 import getRandomBlockColor from "../utils/getRandomBlockColor";
 import getSuperBoostRandom from "../utils/getSuperBoostRandom";
 
@@ -28,13 +29,18 @@ export class GameModel implements IStateService {
     return this.mixesCount
   }
   
-  private checkAvailabilityToBlast(): Boolean {
+  private checkAvailabilityToBlast(): boolean {
     if (this.blocksList.some((b) => b.superBoost)) {
       return true
     }
     
-    return this.blocksList
-      .some((b) => this.onTryToBlast(b, null, true))
+    return true
+    
+    const res = this.blocksList
+      .some((b) =>
+        this.onTryToBlast(b, null, true).result.length )
+    this.clearBlocksToBeRemoved()
+    return res
   }
   
   private moveDownBlocksToEmptyCells() {
@@ -95,6 +101,11 @@ export class GameModel implements IStateService {
         empty: false
       }
     })
+    
+    if (!this.checkAvailabilityToBlast()) {
+      this.generateBlocks()
+      return
+    }
     
     return this.blocksList
   }
@@ -186,11 +197,11 @@ export class GameModel implements IStateService {
       && b.position.y === pos.y)
   }
   
-  private clearRelatedBlocksList() {
+  private clearBlocksToBeRemoved() {
     this.blocksToBeRemoved = []
   }
   
-  public onSuperBoost(block: IBlock): IBlock[] {
+  public onSuperBoost(block: IBlock): IBlastResult {
     this.decrementTurnsCount()
     const superBoostSide = SUPER_BOOST_RADIUS * 2
     const extremeInitialPoint: IPosition = {
@@ -208,26 +219,31 @@ export class GameModel implements IStateService {
         }
       }
     }
-    this.removeBlocks()
-    return this.blocksToBeRemoved
+    this.removeBlocks(false)
+    return {
+      isChecking: false,
+      result: this.blocksToBeRemoved
+    }
   }
   
-  public async onBlockClick(block: IBlock): Promise<WinStatus> {
+  public onBlockClick(block: IBlock): GameStatus {
     this.decrementTurnsCount()
     try {
+      let check = true
       const res = block.superBoost
         ? this.onSuperBoost(block)
-        : await this.onTryToBlast(block)
-      const success = Boolean(res?.length)
+        : this.onTryToBlast(block, null, false)
+      const success = Boolean(!res.isChecking && res.result.length)
       if (success) {
-        this.setPoints(res.length)
+        this.setPoints(res.result.length)
         this.moveDownBlocksToEmptyCells()
+        check = this.checkAvailabilityToBlast()
       }
-      const winStatus = this.getWinStatus()
-      if (winStatus !== 'progress') {
+      const winStatus = this.getGameStatus(check);
+      if (winStatus !== 'progress' && winStatus !== 'mix') {
         this.setInitValues()
       }
-      this.clearRelatedBlocksList()
+      this.clearBlocksToBeRemoved()
       return winStatus
     } catch (e) {
       console.error(e)
@@ -240,12 +256,12 @@ export class GameModel implements IStateService {
     this.turnsCount = MAX_TURNS
   }
   
-  private getWinStatus(): WinStatus {
-    const check = this.checkAvailabilityToBlast()
+  private getGameStatus(check: boolean): GameStatus {
     if (!check && this.mixesCount === 0) {
       return 'loss'
-    } else if (this.mixes !== 0 && !check) {
+    } else if (!check && this.mixes !== 0) {
       this.mixesCount--
+      return 'mix'
     }
     if (this.points >= WIN_POINTS && this.turns >= 0) {
       return 'win'
@@ -256,57 +272,28 @@ export class GameModel implements IStateService {
     return 'progress'
   }
   
-  private async findRelatedBlocks(direction: BlockDirection, block: IBlock) {
-    switch (direction) {
-      case "top":
-        if (block) {
-          if (this.existsBlockForDelete(block)) {
-            break
-          }
-          const nextIterationBlocks = await this.onTryToBlast(block, 'bottom')
-          if (!nextIterationBlocks?.length) {
-            break
-          }
-        }
-        break
-      case "bottom":
-        if (block) {
-          if (this.existsBlockForDelete(block)) {
-            break
-          }
-          const nextIterationBlocks = await this.onTryToBlast(block, 'top')
-          if (!nextIterationBlocks?.length) {
-            break
-          }
-        }
-        break
-      case "right":
-        if (block) {
-          if (this.existsBlockForDelete(block)) {
-            break
-          }
-          const nextIterationBlocks = await this.onTryToBlast(block, 'left')
-          if (!nextIterationBlocks?.length) {
-            break
-          }
-        }
-        break
-      case "left":
-        if (block) {
-          if (this.existsBlockForDelete(block)) {
-            break
-          }
-          const nextIterationBlocks = await this.onTryToBlast(block, 'right')
-          if (!nextIterationBlocks?.length) {
-            break
-          }
-        }
+  private findRelatedBlocks(direction: BlockDirection, block: IBlock, isChecking: boolean) {
+    const excludeDirectionMap: Record<BlockDirection, BlockDirection> = {
+      top: 'bottom',
+      right: 'left',
+      bottom: 'top',
+      left: 'right'
+    }
+    if (block) {
+      if (this.existsBlockForDelete(block)) {
+        return
+      }
+      const nextIterationBlocks =
+        this.onTryToBlast(block, excludeDirectionMap[direction], isChecking)
+      if (!nextIterationBlocks?.result.length) {
+        return
+      }
     }
   }
   
-  private async onTryToBlast(originalBlock: IBlock,
-                             excludeDirection: BlockDirection = null,
-                             isChecking = false) {
+  private onTryToBlast(originalBlock: IBlock,
+                       excludeDirection: BlockDirection,
+                       isChecking: boolean): IBlastResult {
     const top = this.getTop(originalBlock)
     const right = this.getRight(originalBlock)
     const left = this.getLeft(originalBlock)
@@ -319,35 +306,48 @@ export class GameModel implements IStateService {
       this.blocksToBeRemoved.push(foundOriginal)
     }
     
-    if (excludeDirection !== 'top') await this.findRelatedBlocks('top', top)
-    if (excludeDirection !== 'right') await this.findRelatedBlocks('right', right)
-    if (excludeDirection !== 'bottom') await this.findRelatedBlocks('bottom', bottom)
-    if (excludeDirection !== 'left') await this.findRelatedBlocks('left', left)
+    if (excludeDirection !== 'top') this.findRelatedBlocks('top', top, isChecking)
+    if (excludeDirection !== 'right') this.findRelatedBlocks('right', right, isChecking)
+    if (excludeDirection !== 'bottom') this.findRelatedBlocks('bottom', bottom, isChecking)
+    if (excludeDirection !== 'left') this.findRelatedBlocks('left', left, isChecking)
     
-    if (!this.removeBlocks(isChecking)) {
-      return
+    const removeRes = this.removeBlocks(isChecking)
+    
+    if (isChecking) {
+      return {
+        isChecking,
+        result: removeRes ? this.blocksToBeRemoved : []
+      }
     }
     
-    return this.blocksToBeRemoved
+    if (removeRes) {
+      return {
+        isChecking,
+        result: this.blocksToBeRemoved
+      }
+    }
+    
+    return {
+      isChecking,
+      result: []
+    }
   }
   
-  removeBlocks(isChecking = false) {
+  removeBlocks(isChecking: boolean): Boolean {
     if (this.blocksToBeRemoved.length < BLASTED_BLOCKS_COUNT) {
       return false
     }
     
-    if (isChecking) {
-      return true
+    if (!isChecking) {
+      this.blocksToBeRemoved.forEach((blockAround) => {
+        const found = this.blocksList.find((b) =>
+          this.isEqualBlocksPositions(b, blockAround))
+        
+        if (found) {
+          found.empty = true
+        }
+      })
     }
-    
-    this.blocksToBeRemoved.forEach((blockAround) => {
-      const found = this.blocksList.find((b) =>
-        this.isEqualBlocksPositions(b, blockAround))
-      
-      if (found) {
-        found.empty = true
-      }
-    })
     
     return true
   }
