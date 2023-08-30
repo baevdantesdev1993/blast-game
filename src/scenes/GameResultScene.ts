@@ -1,6 +1,7 @@
 import {IBaseComponent} from "../interfaces";
 import {Application, Text, TextStyle} from "pixi.js";
 import {GREEN_COLOR, PADDING_TOP, RED_COLOR} from "../constants";
+import {GameStatus} from "../types";
 
 export default class GameResultScene implements IBaseComponent {
   private app: Application
@@ -14,16 +15,23 @@ export default class GameResultScene implements IBaseComponent {
     this.text.destroy()
   }
   
-  public reRender(success = true) {
+  public reRender(gameStatus: GameStatus) {
     this.destroy()
-    this.render(success)
+    this.render(gameStatus)
   }
   
-  public render(success = true) {
+  public render(gameStatus: GameStatus) {
     const style = new TextStyle({
-      fill: success ? GREEN_COLOR : RED_COLOR
+      fill: gameStatus === 'win' || gameStatus === 'mix'
+        ? GREEN_COLOR : RED_COLOR
     })
-    this.text = new Text(success ? 'Win!' : 'Loss :-(')
+    const statusMap: Record<GameStatus, string> = {
+      win: 'Win!',
+      mix: 'Mix',
+      loss: 'Loss :-(',
+      progress: ''
+    }
+    this.text = new Text(statusMap[gameStatus])
     this.text.x = this.app.renderer.width / 2 - this.text.width / 2
     this.text.y = PADDING_TOP
     this.text.style = style

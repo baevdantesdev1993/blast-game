@@ -30,16 +30,20 @@ export class GameModel implements IStateService {
   }
   
   private checkAvailabilityToBlast(): boolean {
+    if (this.mixesCount === 0) {
+      return false
+    }
     if (this.blocksList.some((b) => b.superBoost)) {
       return true
     }
     
-    return true
-    
     const res = this.blocksList
-      .some((b) =>
-        this.onTryToBlast(b, null, true).result.length )
+      .some((b) => {
+        const r = this.onTryToBlast(b, null, true).result
+        return r.length
+      })
     this.clearBlocksToBeRemoved()
+    return false
     return res
   }
   
@@ -102,10 +106,10 @@ export class GameModel implements IStateService {
       }
     })
     
-    if (!this.checkAvailabilityToBlast()) {
-      this.generateBlocks()
-      return
-    }
+    // if (!this.checkAvailabilityToBlast()) {
+    //   this.generateBlocks()
+    //   return
+    // }
     
     return this.blocksList
   }
@@ -257,9 +261,9 @@ export class GameModel implements IStateService {
   }
   
   private getGameStatus(check: boolean): GameStatus {
-    if (!check && this.mixesCount === 0) {
+    if (!check && this.mixes === 0) {
       return 'loss'
-    } else if (!check && this.mixes !== 0) {
+    } else if (!check && this.mixes > 0) {
       this.mixesCount--
       return 'mix'
     }

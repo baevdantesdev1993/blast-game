@@ -1,9 +1,9 @@
 import {BlockColor} from "./utils/blocksMap";
 
 export interface IBaseComponent {
-  render: () => Promise<void> | void
-  reRender: () => Promise<void> | void
-  destroy: () => Promise<void> | void
+  render: Function
+  reRender: Function
+  destroy: Function
 }
 
 export interface IPosition {

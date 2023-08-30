@@ -6,6 +6,7 @@ import GameResultScene from "./scenes/GameResultScene";
 import PointsDisplayScene from "./scenes/PointsDisplayScene";
 import TurnsDisplayScene from "./scenes/TurnsDisplayScene";
 import MixesDisplayScene from "./scenes/MixesDisplayScene";
+import {GameStatus} from "./types";
 
 
 export const app = new Application<HTMLCanvasElement>({
@@ -25,8 +26,8 @@ const mainField = new FieldScene(app, gameModel)
 
 export const gameResultScene = new GameResultScene(app)
 
-export const renderResult = (success: boolean) => {
-  gameResultScene.render(success)
+export const renderResult = (status: GameStatus) => {
+  gameResultScene.render(status)
 }
 
 export const renderApp = async (reRender = false) => {
