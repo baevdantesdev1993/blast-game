@@ -2,7 +2,7 @@ import {IBaseComponent} from "../interfaces";
 import {Application, Text, TextStyle} from "pixi.js";
 import {GREEN_COLOR, PADDING_TOP, RED_COLOR} from "../constants";
 
-export default class GameResult implements IBaseComponent {
+export default class GameResultScene implements IBaseComponent {
   private app: Application
   private text: Text
   

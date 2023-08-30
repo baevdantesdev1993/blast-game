@@ -3,18 +3,18 @@ import {IBaseComponent, IBlock} from "../interfaces";
 import {BLOCK_SIZE, FIELD_PADDING, FIELD_SIZE} from "../constants";
 import {Application, Assets, Sprite} from "pixi.js";
 
-export default class BlockComponent implements IBaseComponent {
+export default class BlockScene implements IBaseComponent {
   private readonly image: HTMLImageElement
   private sprite: Sprite
   public block: IBlock
   private app: Application
   private readonly startX: number
   private readonly startY: number
-  private readonly onClickCallback: (block: BlockComponent) => void
+  private readonly onClickCallback: (block: BlockScene) => void
 
   constructor(block: IBlock,
               app: Application,
-              onClickCallBack: (block: BlockComponent) => void) {
+              onClickCallBack: (block: BlockScene) => void) {
     this.image = new Image(BLOCK_SIZE, BLOCK_SIZE)
     this.image.src = blocksMap[block.color]
     this.block = block

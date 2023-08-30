@@ -2,42 +2,48 @@ import {IBaseComponent} from "../interfaces";
 import FieldImage from '../assets/field.png'
 import {BLOCK_SIZE, FIELD_PADDING, FIELD_SIZE} from "../constants";
 import {Application, Assets, Sprite} from "pixi.js";
-import {StateService} from "../services/StateService";
-import BlockComponent from "./BlockComponent";
-import {pointsDisplayInstance, renderApp, renderResult, state, turnsDisplayInstance} from "../index";
+import {GameModel} from "../models/GameModel";
+import BlockScene from "./BlockScene";
+import {gameModel, pointsDisplayScene, renderApp, renderResult, turnsDisplayScene} from "../index";
 
-export default class FieldComponent implements IBaseComponent {
+export default class FieldScene implements IBaseComponent {
   private readonly app: Application
   private object: Sprite
-  private state: StateService
+  private state: GameModel
   private readonly startX: number
   private readonly startY: number
-  private blocks: BlockComponent[] = []
+  private blocks: BlockScene[] = []
   
-  public async onBlockClick(block: BlockComponent) {
-    try {
-      const res = await state.onBlockClick(block.block)
-      await renderApp(true)
-      if (res === 'loss') {
-        renderResult(false)
-      }
-      if (res === 'win') {
-        renderResult(true)
-      }
-    } catch (e) {
-    
-    } finally {
-      state.clearRelatedBlocksList()
-      pointsDisplayInstance.reRender()
-      turnsDisplayInstance.reRender()
-    }
-  }
-  
-  constructor(app: Application, state: StateService) {
+  constructor(app: Application, state: GameModel) {
     this.app = app
     this.state = state
     this.startY = (this.app.renderer.height / 2) - FIELD_SIZE / 2 + FIELD_PADDING - BLOCK_SIZE
     this.startX = (this.app.renderer.width / 2) - FIELD_SIZE / 2 + FIELD_PADDING - BLOCK_SIZE
+  }
+  
+  private async reGenerateField() {
+    gameModel.generateBlocks()
+    await this.reRender()
+  }
+  
+  public async onBlockClick(block: BlockScene) {
+    try {
+      const res = await gameModel.onBlockClick(block.block)
+      await renderApp(true)
+      if (res === 'loss') {
+        renderResult(false)
+        await this.reGenerateField()
+      }
+      if (res === 'win') {
+        renderResult(true)
+        await this.reGenerateField()
+      }
+    } catch (e) {
+      console.error(e)
+    } finally {
+      pointsDisplayScene.reRender()
+      turnsDisplayScene.reRender()
+    }
   }
   
   public destroy() {
@@ -52,7 +58,7 @@ export default class FieldComponent implements IBaseComponent {
   
   private renderBlocks() {
     this.state.blocksList.forEach(async (item) => {
-      const component = new BlockComponent(item, this.app, this.onBlockClick)
+      const component = new BlockScene(item, this.app, this.onBlockClick.bind(this))
       await component.render()
       this.blocks.push(component)
     })

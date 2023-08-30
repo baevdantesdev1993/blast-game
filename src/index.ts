@@ -1,10 +1,11 @@
-import {Application, Sprite} from "pixi.js";
-import FieldComponent from "./components/FieldComponent";
-import {StateService} from "./services/StateService";
+import {Application} from "pixi.js";
+import FieldScene from "./scenes/FieldScene";
+import {GameModel} from "./models/GameModel";
 import {BLOCKS_QUANTITY} from "./constants";
-import GameResult from "./components/GameResult";
-import PointsDisplay from "./components/PointsDisplay";
-import TurnsDisplay from "./components/TurnsDisplay";
+import GameResultScene from "./scenes/GameResultScene";
+import PointsDisplayScene from "./scenes/PointsDisplayScene";
+import TurnsDisplayScene from "./scenes/TurnsDisplayScene";
+import MixesDisplayScene from "./scenes/MixesDisplayScene";
 
 
 export const app = new Application<HTMLCanvasElement>({
@@ -16,31 +17,32 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('app').appendChild(app.view);
 }, false);
 
-export const state = new StateService(BLOCKS_QUANTITY)
-let blockInstances: Sprite[] = [];
+export const gameModel = new GameModel(BLOCKS_QUANTITY)
+export const pointsDisplayScene = new PointsDisplayScene(app)
+export const turnsDisplayScene = new TurnsDisplayScene(app)
+export const mixesDisplayScene = new MixesDisplayScene(app)
+const mainField = new FieldScene(app, gameModel)
 
-export const pointsDisplayInstance = new PointsDisplay(app)
-export const turnsDisplayInstance = new TurnsDisplay(app)
-const mainFieldInstance = new FieldComponent(app, state)
-
-export const gameResultInstance = new GameResult(app)
+export const gameResultScene = new GameResultScene(app)
 
 export const renderResult = (success: boolean) => {
-  gameResultInstance.render(success)
+  gameResultScene.render(success)
 }
 
 export const renderApp = async (reRender = false) => {
   if (reRender) {
-    await mainFieldInstance.reRender()
-    pointsDisplayInstance.reRender()
-    turnsDisplayInstance.reRender()
-
+    await mainField.reRender()
+    pointsDisplayScene.reRender()
+    turnsDisplayScene.reRender()
+    mixesDisplayScene.reRender()
+    
     return
   }
-
-  await mainFieldInstance.render()
-  pointsDisplayInstance.render()
-  turnsDisplayInstance.render()
+  
+  await mainField.render()
+  pointsDisplayScene.render()
+  turnsDisplayScene.render()
+  mixesDisplayScene.render()
 };
 
 renderApp();

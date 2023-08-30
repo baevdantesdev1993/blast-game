@@ -2,7 +2,7 @@ import {IBlock, IPosition, IStateService} from "../interfaces";
 import {
   BLASTED_BLOCKS_COUNT,
   BLOCKS_IN_COLUMN,
-  BLOCKS_IN_ROW,
+  BLOCKS_IN_ROW, MAX_MIXES,
   MAX_TURNS,
   SUPER_BOOST_RADIUS,
   WIN_POINTS
@@ -11,16 +11,30 @@ import {BlockDirection, WinStatus} from "../types";
 import getRandomBlockColor from "../utils/getRandomBlockColor";
 import getSuperBoostRandom from "../utils/getSuperBoostRandom";
 
-export class StateService implements IStateService {
+export class GameModel implements IStateService {
   public blocksQuantity: number = 0
   public blocksList: IBlock[] = []
   private blocksToBeRemoved: IBlock[] = []
   private turnsCount: number = MAX_TURNS
   private pointsCount: number = 0
+  private mixesCount: number = MAX_MIXES
   
   constructor(quantity: number) {
     this.blocksQuantity = quantity
     this.generateBlocks()
+  }
+  
+  public get mixes(): number {
+    return this.mixesCount
+  }
+  
+  private checkAvailabilityToBlast(): Boolean {
+    if (this.blocksList.some((b) => b.superBoost)) {
+      return true
+    }
+    
+    return this.blocksList
+      .some((b) => this.onTryToBlast(b, null, true))
   }
   
   private moveDownBlocksToEmptyCells() {
@@ -61,6 +75,7 @@ export class StateService implements IStateService {
   }
   
   public generateBlocks() {
+    this.blocksList = []
     const position: IPosition = {
       x: 1,
       y: 1
@@ -171,7 +186,7 @@ export class StateService implements IStateService {
       && b.position.y === pos.y)
   }
   
-  public clearRelatedBlocksList() {
+  private clearRelatedBlocksList() {
     this.blocksToBeRemoved = []
   }
   
@@ -202,7 +217,7 @@ export class StateService implements IStateService {
     try {
       const res = block.superBoost
         ? this.onSuperBoost(block)
-        :  await this.onTryToBlast(block)
+        : await this.onTryToBlast(block)
       const success = Boolean(res?.length)
       if (success) {
         this.setPoints(res.length)
@@ -210,16 +225,28 @@ export class StateService implements IStateService {
       }
       const winStatus = this.getWinStatus()
       if (winStatus !== 'progress') {
-        this.pointsCount = 0
-        this.turnsCount = MAX_TURNS
+        this.setInitValues()
       }
+      this.clearRelatedBlocksList()
       return winStatus
     } catch (e) {
       console.error(e)
     }
   }
   
+  private setInitValues() {
+    this.mixesCount = MAX_MIXES
+    this.pointsCount = 0
+    this.turnsCount = MAX_TURNS
+  }
+  
   private getWinStatus(): WinStatus {
+    const check = this.checkAvailabilityToBlast()
+    if (!check && this.mixesCount === 0) {
+      return 'loss'
+    } else if (this.mixes !== 0 && !check) {
+      this.mixesCount--
+    }
     if (this.points >= WIN_POINTS && this.turns >= 0) {
       return 'win'
     }
@@ -277,7 +304,9 @@ export class StateService implements IStateService {
     }
   }
   
-  private async onTryToBlast(originalBlock: IBlock, excludeDirection: BlockDirection = null) {
+  private async onTryToBlast(originalBlock: IBlock,
+                             excludeDirection: BlockDirection = null,
+                             isChecking = false) {
     const top = this.getTop(originalBlock)
     const right = this.getRight(originalBlock)
     const left = this.getLeft(originalBlock)
@@ -295,16 +324,20 @@ export class StateService implements IStateService {
     if (excludeDirection !== 'bottom') await this.findRelatedBlocks('bottom', bottom)
     if (excludeDirection !== 'left') await this.findRelatedBlocks('left', left)
     
-    if (!this.removeBlocks()) {
+    if (!this.removeBlocks(isChecking)) {
       return
     }
     
     return this.blocksToBeRemoved
   }
   
-  removeBlocks() {
+  removeBlocks(isChecking = false) {
     if (this.blocksToBeRemoved.length < BLASTED_BLOCKS_COUNT) {
       return false
+    }
+    
+    if (isChecking) {
+      return true
     }
     
     this.blocksToBeRemoved.forEach((blockAround) => {
