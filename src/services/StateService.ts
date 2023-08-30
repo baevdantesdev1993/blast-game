@@ -1,5 +1,12 @@
 import {IBlock, IPosition, IStateService} from "../interfaces";
-import {BLASTED_BLOCKS_COUNT, BLOCKS_IN_COLUMN, BLOCKS_IN_ROW, MAX_TURNS, WIN_POINTS} from "../constants";
+import {
+  BLASTED_BLOCKS_COUNT,
+  BLOCKS_IN_COLUMN,
+  BLOCKS_IN_ROW,
+  MAX_TURNS,
+  SUPER_BOOST_RADIUS,
+  WIN_POINTS
+} from "../constants";
 import {BlockDirection, WinStatus} from "../types";
 import getRandomBlockColor from "../utils/getRandomBlockColor";
 import getSuperBoostRandom from "../utils/getSuperBoostRandom";
@@ -7,7 +14,7 @@ import getSuperBoostRandom from "../utils/getSuperBoostRandom";
 export class StateService implements IStateService {
   public blocksQuantity: number = 0
   public blocksList: IBlock[] = []
-  private blocksAround: IBlock[] = []
+  private blocksToBeRemoved: IBlock[] = []
   private turnsCount: number = MAX_TURNS
   private pointsCount: number = 0
   
@@ -74,8 +81,6 @@ export class StateService implements IStateService {
       }
     })
     
-    console.log(this.blocksList.filter(b => b.superBoost))
-    
     return this.blocksList
   }
   
@@ -123,7 +128,7 @@ export class StateService implements IStateService {
     })
   }
   
-  private getBottom(block: IBlock) {
+  private getBottom(block: IBlock, superBoost = false) {
     return this.blocksList.find((b) => {
       return block.position.x === b.position.x
         && b.position.y === block.position.y + 1
@@ -131,7 +136,7 @@ export class StateService implements IStateService {
     })
   }
   
-  private getRight(block: IBlock) {
+  private getRight(block: IBlock, superBoost = false) {
     return this.blocksList.find((b) => {
       return block.position.x === b.position.x + 1
         && b.position.y === block.position.y
@@ -139,7 +144,7 @@ export class StateService implements IStateService {
     })
   }
   
-  private getLeft(block: IBlock) {
+  private getLeft(block: IBlock, superBoost = false) {
     return this.blocksList.find((b) => {
       return block.position.x === b.position.x - 1
         && b.position.y === block.position.y
@@ -154,7 +159,7 @@ export class StateService implements IStateService {
   }
   
   private existsBlockForDelete(block: IBlock) {
-    return this.blocksAround.some((b) => {
+    return this.blocksToBeRemoved.some((b) => {
       return block.position.x === b.position.x
         && block.position.y === b.position.y
     })
@@ -167,13 +172,37 @@ export class StateService implements IStateService {
   }
   
   public clearRelatedBlocksList() {
-    this.blocksAround = []
+    this.blocksToBeRemoved = []
+  }
+  
+  public onSuperBoost(block: IBlock): IBlock[] {
+    this.decrementTurnsCount()
+    const superBoostSide = SUPER_BOOST_RADIUS * 2
+    const extremeInitialPoint: IPosition = {
+      x: block.position.x - SUPER_BOOST_RADIUS,
+      y: block.position.y - SUPER_BOOST_RADIUS
+    }
+    for (let y = 0; y <= superBoostSide; y++) {
+      for (let x = 0; x <= superBoostSide; x++) {
+        const foundBlock: IBlock = this.findBlockByPos({
+          x: extremeInitialPoint.x + x,
+          y: extremeInitialPoint.y + y
+        })
+        if (foundBlock) {
+          this.blocksToBeRemoved.push(foundBlock)
+        }
+      }
+    }
+    this.removeBlocks()
+    return this.blocksToBeRemoved
   }
   
   public async onBlockClick(block: IBlock): Promise<WinStatus> {
     this.decrementTurnsCount()
     try {
-      const res = await this.onTryToBlast(block)
+      const res = block.superBoost
+        ? this.onSuperBoost(block)
+        :  await this.onTryToBlast(block)
       const success = Boolean(res?.length)
       if (success) {
         this.setPoints(res.length)
@@ -258,7 +287,7 @@ export class StateService implements IStateService {
       this.isEqualBlocksPositions(b, originalBlock))
     
     if (foundOriginal) {
-      this.blocksAround.push(foundOriginal)
+      this.blocksToBeRemoved.push(foundOriginal)
     }
     
     if (excludeDirection !== 'top') await this.findRelatedBlocks('top', top)
@@ -266,11 +295,19 @@ export class StateService implements IStateService {
     if (excludeDirection !== 'bottom') await this.findRelatedBlocks('bottom', bottom)
     if (excludeDirection !== 'left') await this.findRelatedBlocks('left', left)
     
-    if (this.blocksAround.length < BLASTED_BLOCKS_COUNT) {
+    if (!this.removeBlocks()) {
       return
     }
     
-    this.blocksAround.forEach((blockAround) => {
+    return this.blocksToBeRemoved
+  }
+  
+  removeBlocks() {
+    if (this.blocksToBeRemoved.length < BLASTED_BLOCKS_COUNT) {
+      return false
+    }
+    
+    this.blocksToBeRemoved.forEach((blockAround) => {
       const found = this.blocksList.find((b) =>
         this.isEqualBlocksPositions(b, blockAround))
       
@@ -279,6 +316,6 @@ export class StateService implements IStateService {
       }
     })
     
-    return this.blocksAround
+    return true
   }
 }

@@ -23,10 +23,10 @@ export const pointsDisplayInstance = new PointsDisplay(app)
 export const turnsDisplayInstance = new TurnsDisplay(app)
 const mainFieldInstance = new FieldComponent(app, state)
 
-export const gameResult = new GameResult(app)
+export const gameResultInstance = new GameResult(app)
 
 export const renderResult = (success: boolean) => {
-  gameResult.render(success)
+  gameResultInstance.render(success)
 }
 
 export const renderApp = async (reRender = false) => {
@@ -34,11 +34,13 @@ export const renderApp = async (reRender = false) => {
     await mainFieldInstance.reRender()
     pointsDisplayInstance.reRender()
     turnsDisplayInstance.reRender()
-  } else {
-    await mainFieldInstance.render()
-    pointsDisplayInstance.render()
-    turnsDisplayInstance.render()
+
+    return
   }
+
+  await mainFieldInstance.render()
+  pointsDisplayInstance.render()
+  turnsDisplayInstance.render()
 };
 
 renderApp();

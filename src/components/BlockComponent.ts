@@ -11,7 +11,7 @@ export default class BlockComponent implements IBaseComponent {
   private readonly startX: number
   private readonly startY: number
   private readonly onClickCallback: (block: BlockComponent) => void
-  
+
   constructor(block: IBlock,
               app: Application,
               onClickCallBack: (block: BlockComponent) => void) {
@@ -23,36 +23,36 @@ export default class BlockComponent implements IBaseComponent {
     this.startY = (this.app.renderer.height / 2) - FIELD_SIZE / 2 + FIELD_PADDING - BLOCK_SIZE
     this.startX = (this.app.renderer.width / 2) - FIELD_SIZE / 2 + FIELD_PADDING - BLOCK_SIZE
   }
-  
+
   private async onClick() {
     await this.onClickCallback(this)
   }
-  
+
   private onMouseDown() {
     this.sprite.alpha = 0.5
   }
-  
+
   private onMouseUp() {
     this.sprite.alpha = 0.8
   }
-  
+
   private onPointerOver() {
     this.sprite.alpha = 0.8
   }
-  
+
   private onPointerLeave() {
     this.sprite.alpha = 1
   }
-  
+
   public destroy() {
     this.sprite.destroy()
   }
-  
+
   public async reRender() {
     this.destroy()
     await this.render()
   }
-  
+
   public async render() {
     const texture = await Assets.load(this.image.src);
     this.sprite = new Sprite(texture);
@@ -75,7 +75,7 @@ export default class BlockComponent implements IBaseComponent {
       this.sprite.height = BLOCK_SIZE
     }
     if (this.block.superBoost) {
-      this.sprite.tint = 0x068554
+      this.sprite.tint = 0x6b6b6b
     }
     this.app.stage.addChild(this.sprite)
   }
