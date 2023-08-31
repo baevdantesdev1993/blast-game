@@ -39,11 +39,10 @@ export class GameModel implements IStateService {
     
     const res = this.blocksList
       .some((b) => {
-        const r = this.onTryToBlast(b, null, true).result
-        return r.length
+        const {result} = this.onTryToBlast(b, null, true)
+        return result.length
       })
     this.clearBlocksToBeRemoved()
-    return false
     return res
   }
   
@@ -106,10 +105,10 @@ export class GameModel implements IStateService {
       }
     })
     
-    // if (!this.checkAvailabilityToBlast()) {
-    //   this.generateBlocks()
-    //   return
-    // }
+    if (!this.checkAvailabilityToBlast()) {
+      this.generateBlocks()
+      return
+    }
     
     return this.blocksList
   }
@@ -298,11 +297,6 @@ export class GameModel implements IStateService {
   private onTryToBlast(originalBlock: IBlock,
                        excludeDirection: BlockDirection,
                        isChecking: boolean): IBlastResult {
-    const top = this.getTop(originalBlock)
-    const right = this.getRight(originalBlock)
-    const left = this.getLeft(originalBlock)
-    const bottom = this.getBottom(originalBlock)
-    
     const foundOriginal = this.blocksList.find((b) =>
       this.isEqualBlocksPositions(b, originalBlock))
     
@@ -310,24 +304,25 @@ export class GameModel implements IStateService {
       this.blocksToBeRemoved.push(foundOriginal)
     }
     
-    if (excludeDirection !== 'top') this.findRelatedBlocks('top', top, isChecking)
-    if (excludeDirection !== 'right') this.findRelatedBlocks('right', right, isChecking)
-    if (excludeDirection !== 'bottom') this.findRelatedBlocks('bottom', bottom, isChecking)
-    if (excludeDirection !== 'left') this.findRelatedBlocks('left', left, isChecking)
+    if (excludeDirection !== 'top') {
+      this.findRelatedBlocks('top', this.getTop(originalBlock), isChecking)
+    }
+    if (excludeDirection !== 'right') {
+      this.findRelatedBlocks('right', this.getRight(originalBlock), isChecking)
+    }
+    if (excludeDirection !== 'bottom') {
+      this.findRelatedBlocks('bottom', this.getBottom(originalBlock), isChecking)
+    }
+    if (excludeDirection !== 'left') {
+      this.findRelatedBlocks('left', this.getLeft(originalBlock), isChecking)
+    }
     
     const removeRes = this.removeBlocks(isChecking)
     
-    if (isChecking) {
+    if (isChecking || removeRes) {
       return {
         isChecking,
         result: removeRes ? this.blocksToBeRemoved : []
-      }
-    }
-    
-    if (removeRes) {
-      return {
-        isChecking,
-        result: this.blocksToBeRemoved
       }
     }
     
@@ -337,7 +332,7 @@ export class GameModel implements IStateService {
     }
   }
   
-  removeBlocks(isChecking: boolean): Boolean {
+  removeBlocks(isChecking: boolean): boolean {
     if (this.blocksToBeRemoved.length < BLASTED_BLOCKS_COUNT) {
       return false
     }
