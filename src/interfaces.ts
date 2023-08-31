@@ -1,9 +1,9 @@
-import {BlockColor} from "./utils/blocksMap";
+import {BlockColor} from './utils/blocksMap';
 
 export interface IBaseComponent {
-  render: Function
-  reRender: Function
-  destroy: Function
+  render: (arg: never) => void
+  reRender: (arg: never) => void
+  destroy: () => void
 }
 
 export interface IPosition {
