@@ -116,7 +116,6 @@ export default class FieldScene implements IBaseComponent {
 				await this.reGenerateField();
 				return;
 			}
-			// await this.reRender();
 		} catch (e) {
 			console.error(e);
 		} finally {
