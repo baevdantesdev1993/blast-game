@@ -6,28 +6,30 @@ import {GameStatus} from '../types';
 export default class GameResultScene implements IBaseComponent {
 	private app: Application;
 	private text: Text;
- 
+	private timeout: NodeJS.Timeout;
+  
 	constructor(app: Application) {
 		this.app = app;
 	}
- 
+  
 	public destroy() {
 		this.text.destroy();
 	}
- 
+  
 	public reRender(gameStatus: GameStatus) {
 		this.destroy();
 		this.render(gameStatus);
 	}
- 
+  
 	public render(gameStatus: GameStatus) {
+		clearTimeout(this.timeout);
 		const style = new TextStyle({
 			fill: gameStatus === 'win' || gameStatus === 'mix'
 				? GREEN_COLOR : RED_COLOR
 		});
 		const statusMap: Record<GameStatus, string> = {
 			win: 'Win!',
-			mix: 'Mix',
+			mix: 'Mixed',
 			loss: 'Loss :-(',
 			progress: ''
 		};
@@ -36,8 +38,8 @@ export default class GameResultScene implements IBaseComponent {
 		this.text.y = PADDING_TOP;
 		this.text.style = style;
 		this.app.stage.addChild(this.text);
-		setTimeout(() => {
+		this.timeout = setTimeout(() => {
 			this.destroy();
-		}, 2000);
+		}, 3000);
 	}
 }

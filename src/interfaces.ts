@@ -1,4 +1,5 @@
 import {BlockColor} from './utils/blocksMap';
+import {GameStatus} from './types';
 
 export interface IBaseComponent {
   render: (arg: never) => void
@@ -14,17 +15,39 @@ export interface IPosition {
 export interface IBlock {
   color: BlockColor,
   position: IPosition,
-  empty: boolean,
   superBoost: boolean
-}
-
-export interface IStateService {
-  blocksQuantity: number
-  blocksList: IBlock[]
 }
 
 export interface IBlastResult {
   isChecking: boolean,
   result: IBlock[]
+}
+
+export interface IRemoveStage {
+  removedBlocks: IBlock[],
+}
+
+export interface IMoveBlock {
+  block: IBlock,
+  target: IPosition
+}
+
+export interface IMoveStage {
+  movedBlocks: IMoveBlock[]
+}
+
+export interface IAddStage {
+  addedBlocks: IBlock[]
+}
+
+export interface ITurnResult {
+  gameStatus: GameStatus,
+  blocksList: IBlock[],
+  success: boolean,
+  stages: {
+    remove: IRemoveStage,
+    move: IMoveStage,
+    add: IAddStage
+  }
 }
 

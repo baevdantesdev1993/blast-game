@@ -1,4 +1,4 @@
-import {IBlastResult, IBlock, IPosition, IStateService} from '../interfaces';
+import {IBlastResult, IBlock, IMoveBlock, IPosition, ITurnResult} from '../interfaces';
 import {
 	BLASTED_BLOCKS_COUNT,
 	BLOCKS_IN_COLUMN,
@@ -11,14 +11,21 @@ import {
 import {BlockDirection, GameStatus} from '../types';
 import getRandomBlockColor from '../utils/getRandomBlockColor';
 import getSuperBoostRandom from '../utils/getSuperBoostRandom';
+import comparePositions from '../utils/comparePositions';
 
-export class GameModel implements IStateService {
-	public blocksQuantity: number = 0;
-	public blocksList: IBlock[] = [];
+export class GameModel {
+	private blocksQuantity: number = 0;
+	private blocksList: IBlock[] = [];
 	private blocksToBeRemoved: IBlock[] = [];
 	private turnsCount: number = MAX_TURNS;
 	private pointsCount: number = 0;
 	private mixesCount: number = MAX_MIXES;
+	private blocksToBeMoved: IMoveBlock[] = [];
+	private blocksToBeAdded: IBlock[] = [];
+ 
+	public get blocks(): IBlock[] {
+		return this.blocksList;
+	}
  
 	constructor(quantity: number) {
 		this.blocksQuantity = quantity;
@@ -42,40 +49,57 @@ export class GameModel implements IStateService {
 			});
 	}
  
-	private moveDownBlocksToEmptyCells() {
+	private addNewBlocks() {
+		this.blocksToBeAdded = [];
+		this.reversedColumns.forEach((column, index) => {
+			for (let y = BLOCKS_IN_COLUMN; y >= 1; y--) {
+				const foundBlock = column.find(b => b.position.y === y);
+				if (!foundBlock) {
+					const newBlock: IBlock = {
+						position: {
+							x: index + 1,
+							y
+						},
+						color: getRandomBlockColor(),
+						superBoost: getSuperBoostRandom()
+					};
+					this.blocksToBeAdded.push(newBlock);
+				}
+			}
+		});
+		this.blocksList.push(...this.blocksToBeAdded);
+	}
+ 
+	private moveBlocks() {
+		this.blocksToBeMoved = [];
+		this.blocksToBeAdded = [];
 		this.reversedColumns.forEach((column) => {
 			let emptyFlowLength = 0;
-			let emptyFlow = false;
-			let yPositionForAdding = 1;
-			column.forEach((block) => {
-				if (block.empty) {
-					if (!emptyFlow) {
-						emptyFlow = true;
-					}
+			for (let y = BLOCKS_IN_COLUMN; y >= 1; y--) {
+				const foundBlock = column.find(b => b.position.y === y);
+				if (!foundBlock) {
 					emptyFlowLength++;
-					const found = this.findBlockByPos(
-						{x: block.position.x, y: block.position.y}
-					);
-     
-					if (found && found.empty) {
-						const index = this.blocksList.indexOf(found);
-						this.blocksList.splice(index, 1);
-						this.blocksList.push({
-							position: {
-								x: block.position.x,
-								y: yPositionForAdding
-							},
-							color: getRandomBlockColor(),
-							superBoost: getSuperBoostRandom(),
-							empty: false
-						});
-						yPositionForAdding++;
-					}
 				} else {
-					emptyFlow = false;
-					block.position.y = block.position.y + emptyFlowLength;
+					const initialBlock: IBlock = JSON.parse(JSON.stringify(foundBlock));
+					if (emptyFlowLength) {
+						this.blocksToBeMoved.push({
+							block: initialBlock,
+							target: {
+								x: foundBlock.position.x,
+								y: foundBlock.position.y + emptyFlowLength
+							}
+						});
+					}
 				}
-			});
+			}
+		});
+		this.blocksToBeMoved.forEach((block) => {
+			const found = this.blocksList.find((b) =>
+				comparePositions(b.position, block.block.position)
+			);
+			if (found) {
+				found.position = block.target;
+			}
 		});
 	}
  
@@ -183,10 +207,9 @@ export class GameModel implements IStateService {
 	}
  
 	private existsBlockForDelete(block: IBlock) {
-		return this.blocksToBeRemoved.some((b) => {
-			return block.position.x === b.position.x
-        && block.position.y === b.position.y;
-		});
+		return this.blocksToBeRemoved.some((b) =>
+			comparePositions(b.position, block.position)
+		);
 	}
  
 	private findBlockByPos(pos: IPosition): IBlock {
@@ -224,7 +247,7 @@ export class GameModel implements IStateService {
 		};
 	}
  
-	public onBlockClick(block: IBlock): GameStatus {
+	public onBlockClick(block: IBlock): ITurnResult {
 		this.decrementTurnsCount();
 		try {
 			let check = true;
@@ -235,14 +258,30 @@ export class GameModel implements IStateService {
 			const success = Boolean(!res.isChecking && res.result.length);
 			if (success) {
 				this.setPoints(res.result.length);
-				this.moveDownBlocksToEmptyCells();
+				this.moveBlocks();
+				this.addNewBlocks();
 				check = this.checkAvailabilityToBlast();
 			}
-			const winStatus = this.getGameStatus(check);
-			if (winStatus !== 'progress' && winStatus !== 'mix') {
+			const gameStatus = this.getGameStatus(check);
+			if (gameStatus !== 'progress' && gameStatus !== 'mix') {
 				this.setInitValues();
 			}
-			return winStatus;
+			return {
+				success,
+				gameStatus,
+				blocksList: this.blocksList,
+				stages: {
+					remove: {
+						removedBlocks: res.result,
+					},
+					move: {
+						movedBlocks: this.blocksToBeMoved
+					},
+					add: {
+						addedBlocks: this.blocksToBeAdded
+					}
+				}
+			};
 		} catch (e) {
 			console.error(e);
 		}
@@ -342,7 +381,9 @@ export class GameModel implements IStateService {
 					this.isEqualBlocksPositions(b, blockAround));
      
 				if (found) {
-					found.empty = true;
+					this.blocksList.splice(
+						this.blocksList.indexOf(found), 1
+					);
 				}
 			});
 		}
