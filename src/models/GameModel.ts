@@ -72,7 +72,6 @@ export class GameModel {
  
 	private moveBlocks() {
 		this.blocksToBeMoved = [];
-		this.blocksToBeAdded = [];
 		this.reversedColumns.forEach((column) => {
 			let emptyFlowLength = 0;
 			for (let y = BLOCKS_IN_COLUMN; y >= 1; y--) {
@@ -93,6 +92,10 @@ export class GameModel {
 				}
 			}
 		});
+		this.updateBlocksListAfterMove();
+	}
+	
+	private updateBlocksListAfterMove() {
 		this.blocksToBeMoved.forEach((block) => {
 			const found = this.blocksList.find((b) =>
 				comparePositions(b.position, block.block.position)
