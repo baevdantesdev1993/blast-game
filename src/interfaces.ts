@@ -23,6 +23,16 @@ export interface IBlastResult {
   result: IBlock[]
 }
 
+export interface IRenderParams {
+  position: IPosition,
+  anchor?: {
+    x: number,
+    y: number
+  },
+  width?: number,
+  height?: number
+}
+
 export interface IRemoveStage {
   removedBlocks: IBlock[],
 }

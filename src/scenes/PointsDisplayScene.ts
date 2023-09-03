@@ -1,55 +1,62 @@
-import {Application, Graphics, GraphicsGeometry, Sprite, Text} from 'pixi.js';
+import {Container, Graphics, Text} from 'pixi.js';
 import {gameModel} from '../index';
-import {
-	FIELD_PADDING,
-	FIELD_SIZE,
-	GREEN_COLOR,
-	GREY_COLOR,
-	PADDING_TOP,
-	PROGRESS_BAR_WIDTH,
-	WIN_POINTS
-} from '../constants';
-import {IBaseComponent} from '../interfaces';
+import {GREEN_COLOR, GREY_COLOR, MAX_TURNS, PROGRESS_BAR_WIDTH, WIN_POINTS} from '../constants';
+import {IRenderParams} from '../interfaces';
+import {Align} from '../types';
 
-export default class PointsDisplayScene implements IBaseComponent {
-	private app: Application;
+export default class PointsDisplayScene extends Container {
 	private text: Text;
 	private progressBar: Graphics;
+	private readonly align: Align = 'left';
  
-	constructor(app: Application) {
-		this.app = app;
+	constructor(params: IRenderParams, align: Align = 'left') {
+		super();
+		this.align = align;
+		this.x = params.position.x;
+		this.y = params.position.y;
+		this.create();
 	}
  
-	public destroy() {
-		this.text.destroy();
-		this.progressBar.destroy();
-	}
- 
-	public reRender() {
+	public reCreate() {
 		this.destroy();
-		this.render();
+		this.create();
+	}
+	
+	public destroy() {
+		this.removeChild(this.text);
+		this.removeChild(this.progressBar);
 	}
  
-	private drawProgressBar(fillProgress = false) {
+	private drawProgressBar(filled = false) {
 		this.progressBar = new Graphics();
-		this.progressBar.beginFill(fillProgress ? GREEN_COLOR : GREY_COLOR);
+		this.progressBar.beginFill(filled ? GREEN_COLOR : GREY_COLOR);
 		this.progressBar.drawRect(0,
-			20,
-			fillProgress ? PROGRESS_BAR_WIDTH * ((gameModel.points/WIN_POINTS)) : PROGRESS_BAR_WIDTH,
+			30,
+			filled ? PROGRESS_BAR_WIDTH * ((gameModel.points / WIN_POINTS)) : PROGRESS_BAR_WIDTH,
 			20);
+		if (this.align === 'right') {
+			if (filled) {
+				this.progressBar.x = this.progressBar.x - this.progressBar.width
+					- (PROGRESS_BAR_WIDTH - PROGRESS_BAR_WIDTH * ((gameModel.turns / MAX_TURNS)));
+			} else {
+				this.progressBar.x = this.progressBar.x - this.progressBar.width;
+			}
+		}
 		this.progressBar.endFill();
-		this.progressBar.x = (this.app.renderer.width / 2) - FIELD_SIZE / 2 + FIELD_PADDING;
-		this.progressBar.y = PADDING_TOP * 2;
-		this.app.stage.addChild(this.progressBar);
+		this.addChild(this.progressBar);
 	}
  
-	public render() {
+	private renderText() {
+		this.text = new Text(`Points: ${gameModel.points}/${WIN_POINTS}`);
+		if (this.align === 'right') {
+			this.text.x = this.text.x - this.text.width;
+		}
+		this.addChild(this.text);
+	}
+ 
+	public create() {
+		this.renderText();
 		this.drawProgressBar();
 		this.drawProgressBar(true);
-  
-		this.text = new Text(`Points: ${gameModel.points}/${WIN_POINTS}`);
-		this.text.x = (this.app.renderer.width / 2) - FIELD_SIZE / 2 + FIELD_PADDING;
-		this.text.y = PADDING_TOP;
-		this.app.stage.addChild(this.text);
 	}
 }
