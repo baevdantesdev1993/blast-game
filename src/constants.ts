@@ -16,7 +16,7 @@ export const MAX_TURNS = BLASTED_BLOCKS_COUNT * 5 ;
 export const WIN_POINTS = BLASTED_BLOCKS_COUNT * 10;
 // --- main settings for game ---
 
-export const PADDING_TOP = 20;
+export const COMMON_PADDING = 20;
 export const PROGRESS_BAR_WIDTH  = 200;
 
 // --- colors ---

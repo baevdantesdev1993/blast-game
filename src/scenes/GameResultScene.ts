@@ -1,28 +1,18 @@
-import {IBaseComponent} from '../interfaces';
-import {Application, Text, TextStyle} from 'pixi.js';
-import {GREEN_COLOR, PADDING_TOP, RED_COLOR} from '../constants';
+import {Text, TextStyle} from 'pixi.js';
+import {GREEN_COLOR, RED_COLOR} from '../constants';
 import {GameStatus} from '../types';
+import {IRenderParams} from '../interfaces';
 
-export default class GameResultScene implements IBaseComponent {
-	private app: Application;
-	private text: Text;
-	private timeout: NodeJS.Timeout;
-  
-	constructor(app: Application) {
-		this.app = app;
+export default class GameResultScene extends Text {
+	params: IRenderParams;
+ 
+	constructor(params: IRenderParams) {
+		super();
+		this.params = params;
+		this.y = params.position.y;
 	}
-  
-	public destroy() {
-		this.text.destroy();
-	}
-  
-	public reRender(gameStatus: GameStatus) {
-		this.destroy();
-		this.render(gameStatus);
-	}
-  
-	public render(gameStatus: GameStatus) {
-		clearTimeout(this.timeout);
+ 
+	public create(gameStatus: GameStatus) {
 		const style = new TextStyle({
 			fill: gameStatus === 'win' || gameStatus === 'mix'
 				? GREEN_COLOR : RED_COLOR
@@ -33,13 +23,8 @@ export default class GameResultScene implements IBaseComponent {
 			loss: 'Loss :-(',
 			progress: ''
 		};
-		this.text = new Text(statusMap[gameStatus]);
-		this.text.x = this.app.renderer.width / 2 - this.text.width / 2;
-		this.text.y = PADDING_TOP;
-		this.text.style = style;
-		this.app.stage.addChild(this.text);
-		this.timeout = setTimeout(() => {
-			this.destroy();
-		}, 3000);
+		this.text = statusMap[gameStatus];
+		this.x = this.params.position.x - this.width / 2;
+		this.style = style;
 	}
 }
