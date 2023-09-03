@@ -25,10 +25,7 @@ export interface IBlastResult {
 
 export interface IRenderParams {
   position: IPosition,
-  anchor?: {
-    x: number,
-    y: number
-  },
+  anchor?: IPosition,
   width?: number,
   height?: number
 }

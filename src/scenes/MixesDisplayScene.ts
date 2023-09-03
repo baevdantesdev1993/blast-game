@@ -1,8 +1,9 @@
 import {Container, Graphics, Text} from 'pixi.js';
 import {gameModel} from '../index';
-import {GREY_COLOR, MAX_MIXES, MAX_TURNS, PROGRESS_BAR_WIDTH, RED_COLOR} from '../constants';
+import {MAX_MIXES, PROGRESS_BAR_WIDTH, RED_COLOR} from '../constants';
 import {IRenderParams} from '../interfaces';
 import {Align} from '../types';
+import ProgressBarScene from './ProgressBarScene';
 
 export default class MixesDisplayScene extends Container {
 	private text: Text;
@@ -27,25 +28,6 @@ export default class MixesDisplayScene extends Container {
 		this.removeChild(this.progressBar);
 	}
  
-	private drawProgressBar(filled = false) {
-		this.progressBar = new Graphics();
-		this.progressBar.beginFill(filled ? RED_COLOR : GREY_COLOR);
-		this.progressBar.drawRect(0,
-			30,
-			filled ? PROGRESS_BAR_WIDTH * ((gameModel.mixes / MAX_MIXES)) : PROGRESS_BAR_WIDTH,
-			20);
-		if (this.align === 'right') {
-			if (filled) {
-				this.progressBar.x = this.progressBar.x - this.progressBar.width
-          - (PROGRESS_BAR_WIDTH - PROGRESS_BAR_WIDTH * ((gameModel.turns / MAX_TURNS)));
-			} else {
-				this.progressBar.x = this.progressBar.x - this.progressBar.width;
-			}
-		}
-		this.progressBar.endFill();
-		this.addChild(this.progressBar);
-	}
- 
 	private renderText() {
 		this.text = new Text(`Mixes: ${gameModel.mixes}/${MAX_MIXES}`);
 		if (this.align === 'right') {
@@ -54,9 +36,23 @@ export default class MixesDisplayScene extends Container {
 		this.addChild(this.text);
 	}
  
+	private renderProgressBar() {
+		this.progressBar = new ProgressBarScene({
+			width: PROGRESS_BAR_WIDTH,
+			height: 20,
+			position: {
+				x: 0,
+				y: 20
+			},
+			align: 'left',
+			color: RED_COLOR,
+			filledPercent: (gameModel.mixes / MAX_MIXES)
+		});
+		this.addChild(this.progressBar);
+	}
+ 
 	public create() {
 		this.renderText();
-		this.drawProgressBar();
-		this.drawProgressBar(true);
+		this.renderProgressBar();
 	}
 }
