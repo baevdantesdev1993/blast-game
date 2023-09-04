@@ -3,7 +3,7 @@ import {GREEN_COLOR, RED_COLOR} from '../constants';
 import {GameStatus} from '../types';
 import {IRenderParams} from '../interfaces';
 
-export default class GameResultScene extends Text {
+export default class GameResult extends Text {
 	params: IRenderParams;
  
 	constructor(params: IRenderParams) {

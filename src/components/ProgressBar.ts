@@ -9,7 +9,7 @@ export interface IProgressBarParams extends IRenderParams {
   filledPercent: number
 }
 
-export default class ProgressBarScene extends Graphics {
+export default class ProgressBar extends Graphics {
 	align: Align = 'left';
 	filledPercent: number;
 	color: string;
@@ -31,7 +31,7 @@ export default class ProgressBarScene extends Graphics {
 	private drawProgressBar(filled = false) {
 		this.beginFill(filled ? this.color : GREY_COLOR);
 		this.drawRect(0,
-			10,
+			0,
 			filled ? this.progressBarWidth * (this.filledPercent) : this.progressBarWidth,
 			this.progressBarHeight);
 		if (this.align === 'right') {

@@ -1,31 +1,23 @@
-import blocksMap from '../utils/blocksMap';
 import {IBlock, IPosition, IRenderParams} from '../interfaces';
-import {Assets, Sprite} from 'pixi.js';
+import {Sprite, Texture} from 'pixi.js';
+import {loader} from '../index';
 
-interface IBlockSceneParams extends IRenderParams {
+interface IBlockParams extends IRenderParams {
   block: IBlock,
-  onClickCallBack: (block: BlockScene) => void
+  onClickCallBack: (block: Block) => void
+  animationTextures: Texture[]
 }
 
-export default class BlockScene extends Sprite {
+export default class Block extends Sprite {
 	private readonly props: IBlock;
-	private readonly image: HTMLImageElement;
-	private readonly onClickCallback: (block: BlockScene) => void;
+	private readonly onClickCallback: (block: Block) => void;
  
 	public get properties() {
 		return this.props;
 	}
-	
-	public setPosition(pos: IPosition, realPos: IPosition) {
-		this.props.position = pos;
-		this.x = realPos.x;
-		this.y = realPos.y;
-	}
  
-	constructor(params: IBlockSceneParams) {
+	constructor(params: IBlockParams) {
 		super();
-		this.image = new Image(params.width, params.height);
-		this.image.src = blocksMap[params.block.color];
 		this.props = params.block;
 		this.x = params.position.x;
 		this.y = params.position.y;
@@ -33,6 +25,7 @@ export default class BlockScene extends Sprite {
 		this.eventMode = 'static';
 		this.cursor = 'pointer';
 		this.on('click', this.onClick, this);
+		this.on('touchend', this.onClick, this);
 		this.on('pointerover', this.onPointerOver, this);
 		this.on('pointerleave', this.onPointerLeave, this);
 		this.on('mousedown', this.onMouseDown, this);
@@ -42,16 +35,22 @@ export default class BlockScene extends Sprite {
 		if (this.props.superBoost) {
 			this.tint = 0x6b6b6b;
 		}
+		this.create();
 	}
  
-	public async move(position: IPosition) {
-		// this.remove();
-		// this.props.position = position;
-		// await this.create();
+	public remove() {
+		this.destroy();
 	}
  
-	public async create() {
-		this.texture = await Assets.load(this.image.src);
+	public moveTo(position: IPosition, realPosition: IPosition) {
+		const size = {
+			width: this.width,
+			height: this.height
+		};
+		this.props.position = position;
+		this.setTransform(realPosition.x, realPosition.y);
+		this.width = size.width;
+		this.height = size.height;
 	}
  
 	private onClick() {
@@ -72,5 +71,9 @@ export default class BlockScene extends Sprite {
  
 	private onPointerLeave() {
 		this.alpha = 1;
+	}
+ 
+	private create() {
+		this.texture = loader.blocksTextures[this.props.color];
 	}
 }

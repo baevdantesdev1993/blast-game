@@ -1,7 +1,9 @@
 import {Application} from 'pixi.js';
-import MainView from './views/MainView';
+import MainScene from './scenes/MainScene';
 import {GameModel} from './models/GameModel';
-import {BLOCKS_QUANTITY} from './constants';
+import {BLOCK_SIZE, BLOCKS_QUANTITY, FIELD_SIZE} from './constants';
+import AnimationService from './services/AnimationService';
+import Loader from './loader/Loader';
 
 export const app = new Application<HTMLCanvasElement>({
 	background: '#bebebe',
@@ -11,15 +13,25 @@ export const app = new Application<HTMLCanvasElement>({
 window.onload = () => document.getElementById('app').appendChild(app.view);
 
 export const gameModel = new GameModel(BLOCKS_QUANTITY);
-const mainView = new MainView();
-
-export const renderApp = async (reRender = false) => {
+export const loader = new Loader(
+	{
+		blockSize: BLOCK_SIZE,
+		fieldSize: FIELD_SIZE
+	}
+);
+const mainView = new MainScene();
+export const renderApp = (reRender = false) => {
 	if (reRender) {
-		await mainView.reCreate();
+		mainView.reCreate();
 		return;
 	}
-  
-	await mainView.create();
+ 
+	mainView.create();
 };
 
-renderApp();
+const init = async () => {
+	await loader.init();
+	renderApp();
+};
+
+init();

@@ -1,11 +1,11 @@
 import {Container, Graphics, Text} from 'pixi.js';
 import {gameModel} from '../index';
-import {GREY_COLOR, MAX_MIXES, MAX_TURNS, PROGRESS_BAR_WIDTH, RED_COLOR} from '../constants';
+import {MAX_TURNS, PROGRESS_BAR_WIDTH, RED_COLOR} from '../constants';
 import {IRenderParams} from '../interfaces';
 import {Align} from '../types';
-import ProgressBarScene from './ProgressBarScene';
+import ProgressBar from './ProgressBar';
 
-export default class TurnsDisplayScene extends Container {
+export default class TurnsDisplay extends Container {
 	private text: Text;
 	private progressBar: Graphics;
 	private align: Align = 'left';
@@ -27,14 +27,14 @@ export default class TurnsDisplayScene extends Container {
 		this.removeChild(this.text);
 		this.removeChild(this.progressBar);
 	}
-	
+ 
 	private renderProgressBar() {
-		this.progressBar = new ProgressBarScene({
+		this.progressBar = new ProgressBar({
 			width: PROGRESS_BAR_WIDTH,
 			height: 20,
 			position: {
 				x: 0,
-				y: 20
+				y: 35
 			},
 			align: 'right',
 			color: RED_COLOR,
@@ -50,7 +50,7 @@ export default class TurnsDisplayScene extends Container {
 		}
 		this.addChild(this.text);
 	}
-	
+ 
 	public create() {
 		this.renderText();
 		this.renderProgressBar();

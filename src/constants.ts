@@ -25,3 +25,4 @@ export const RED_COLOR = '#dc3b57';
 export const GREY_COLOR = '#ededed';
 // --- colors ---
 
+export const FPS = 60;
