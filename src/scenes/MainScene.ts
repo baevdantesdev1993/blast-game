@@ -49,7 +49,7 @@ export default class MainScene extends Container {
 				comparePositions(b.properties.position, block.position)
 			);
 			if (found) {
-				found.destroy();
+				found.remove();
 			}
 		});
 		blocksToBeRemoved.forEach((block) => {
@@ -72,9 +72,6 @@ export default class MainScene extends Container {
 			);
 			if (found) {
 				found.moveTo(block.target, this.getBlockPosition(block.target));
-				// this.removeChild(found);
-				// found.setPosition(block.target, this.getBlockPosition(block.target));
-				// this.addChild(found);
 			}
 		});
 	}
@@ -135,14 +132,14 @@ export default class MainScene extends Container {
 		}
 	}
  
-	public destroy() {
-		this.blocks.forEach((b) => b.destroy());
+	public remove() {
+		this.blocks.forEach((b) => b.remove());
 		this.blocks = [];
 		this.removeChildren(0, this.children.length);
 	}
  
 	public reCreate() {
-		this.destroy();
+		this.remove();
 		this.create();
 	}
  

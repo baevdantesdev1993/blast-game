@@ -7,7 +7,7 @@ interface ILoaderParams {
 	fieldSize: number
 }
 
-export default class Loader {
+export default class LoaderService {
 	private blocks: Record<BlockColor, Texture>;
 	private field: Texture;
 	private readonly blockSize: number;

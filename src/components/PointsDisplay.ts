@@ -19,11 +19,11 @@ export default class PointsDisplay extends Container {
 	}
  
 	public reCreate() {
-		this.destroy();
+		this.remove();
 		this.create();
 	}
  
-	public destroy() {
+	public remove() {
 		this.removeChild(this.text);
 		this.removeChild(this.progressBar);
 	}
