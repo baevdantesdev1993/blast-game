@@ -5,6 +5,7 @@ import {IRenderParams} from '../interfaces';
 
 export default class GameResult extends Text {
 	params: IRenderParams;
+	timeoutID: NodeJS.Timeout;
  
 	constructor(params: IRenderParams) {
 		super();
@@ -26,5 +27,8 @@ export default class GameResult extends Text {
 		this.text = statusMap[gameStatus];
 		this.x = this.params.position.x - this.width / 2;
 		this.style = style;
+		this.timeoutID = setTimeout(() => {
+			this.destroy();
+		}, 3000);
 	}
 }

@@ -197,9 +197,6 @@ export default class MainScene extends Container {
 		});
 		this.gameResult.create(gameStatus);
 		this.addChild(this.gameResult);
-		setTimeout(() => {
-			this.removeChild(this.gameResult);
-		}, 3000);
 	}
  
 	private renderField() {
