@@ -19,7 +19,7 @@ export const renderApp = (reRender = false) => {
 		mainView.reCreate();
 		return;
 	}
- 
+  
 	mainView.create();
 };
 
@@ -30,4 +30,9 @@ const init = async () => {
 
 init();
 
-export const {blockSizeVal, fieldSizeVal, progressbarWidthValue} = loaderService;
+export const {
+	blockSizeVal,
+	fieldSizeVal,
+	progressbarWidthValue,
+	displayFontStyleValue
+} = loaderService;

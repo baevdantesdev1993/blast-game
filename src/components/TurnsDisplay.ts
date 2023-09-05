@@ -1,6 +1,6 @@
 import {Container, Graphics, Text} from 'pixi.js';
-import {gameModel, progressbarWidthValue} from '../index';
-import {MAX_TURNS, RED_COLOR} from '../constants';
+import {app, displayFontStyleValue, gameModel, progressbarWidthValue} from '../index';
+import {MAX_TURNS, MOBILE_BREAKPOINT, RED_COLOR} from '../constants';
 import {IRenderParams} from '../interfaces';
 import {Align} from '../types';
 import ProgressBar from './ProgressBar';
@@ -34,7 +34,7 @@ export default class TurnsDisplay extends Container {
 			height: 20,
 			position: {
 				x: 0,
-				y: 35
+				y: app.renderer.width <= MOBILE_BREAKPOINT ? 22 : 35
 			},
 			align: 'right',
 			color: RED_COLOR,
@@ -45,6 +45,7 @@ export default class TurnsDisplay extends Container {
   
 	private renderText() {
 		this.text = new Text(`Turns: ${gameModel.turns}/${MAX_TURNS}`);
+		this.text.style = displayFontStyleValue;
 		if (this.align === 'right') {
 			this.text.x = this.text.x - this.text.width;
 		}

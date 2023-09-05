@@ -64,8 +64,14 @@ export default class LoaderService {
 		this.blockSize = (this.fieldSize - FIELD_PADDING * 2) / BLOCKS_IN_COLUMN;
 		if (app.renderer.width <= MOBILE_BREAKPOINT) {
 			this.progressbarWidth = 140;
+			this.displayFontStyle = new TextStyle({
+				fontSize: 20
+			});
 		} else {
 			this.progressbarWidth = 200;
+			this.displayFontStyle = new TextStyle({
+				fontSize: 24
+			});
 		}
 	}
  
