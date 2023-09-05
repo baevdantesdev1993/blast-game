@@ -11,7 +11,6 @@ import TurnsDisplay from '../components/TurnsDisplay';
 import MixesDisplay from '../components/MixesDisplay';
 import GameResult from '../components/GameResult';
 import {GameStatus} from '../types';
-import AnimationService from '../services/AnimationService';
 
 export default class MainScene extends Container {
 	private blocks: Block[] = [];
@@ -20,7 +19,6 @@ export default class MainScene extends Container {
 	private mixesDisplay: MixesDisplay;
 	private gameResult: GameResult;
 	private field: Field;
-	private animationService: AnimationService;
  
 	constructor() {
 		super();
@@ -43,15 +41,17 @@ export default class MainScene extends Container {
 		this.mixesDisplay.reCreate();
 	}
  
-	private removeBlocks(blocksToBeRemoved: IBlock[]) {
-		blocksToBeRemoved.forEach((block) => {
-			const found = this.blocks.find(b =>
-				comparePositions(b.properties.position, block.position)
-			);
-			if (found) {
-				found.remove();
-			}
-		});
+	private async removeBlocks(blocksToBeRemoved: IBlock[]) {
+		await Promise.all(
+			blocksToBeRemoved.map(async (block) => {
+				const found = this.blocks.find(b =>
+					comparePositions(b.properties.position, block.position)
+				);
+				if (found) {
+					await found.remove();
+				}
+			})
+		);
 		blocksToBeRemoved.forEach((block) => {
 			const found = this.blocks.find(b =>
 				comparePositions(b.properties.position, block.position)
@@ -65,15 +65,17 @@ export default class MainScene extends Container {
 		});
 	}
  
-	private moveBlocks(blocksToBeMoved: IMoveBlock[]) {
-		blocksToBeMoved.forEach((block) => {
-			const found = this.blocks.find(b =>
-				comparePositions(b.properties.position, block.block.position)
-			);
-			if (found) {
-				found.moveTo(block.target, this.getBlockPosition(block.target));
-			}
-		});
+	private async moveBlocks(blocksToBeMoved: IMoveBlock[]) {
+		await Promise.all(
+			blocksToBeMoved.map(async (block) => {
+				const found = this.blocks.find(b =>
+					comparePositions(b.properties.position, block.block.position)
+				);
+				if (found) {
+					await found.moveTo(block.target, this.getBlockPosition(block.target));
+				}
+			})
+		);
 	}
  
 	private getBlockPosition(pos: IPosition) {
@@ -92,7 +94,6 @@ export default class MainScene extends Container {
 					height: BLOCK_SIZE,
 					block: JSON.parse(JSON.stringify(block)),
 					onClickCallBack: this.onBlockClick.bind(this),
-					animationTextures: []
 				});
 			this.blocks.push(blockScene);
 			this.addChild(blockScene);
@@ -104,10 +105,9 @@ export default class MainScene extends Container {
 			const res = gameModel.onBlockClick(block.properties);
 			if (res.success) {
 				this.disableField(true);
-				this.removeBlocks(res.stages.remove.removedBlocks);
-				await delay(200);
+				await this.removeBlocks(res.stages.remove.removedBlocks);
 				if (res.stages.move.movedBlocks.length) {
-					this.moveBlocks(res.stages.move.movedBlocks);
+					await this.moveBlocks(res.stages.move.movedBlocks);
 					await delay(200);
 				}
 				this.addBlocks(res.stages.add.addedBlocks);
@@ -152,7 +152,6 @@ export default class MainScene extends Container {
 					height: BLOCK_SIZE,
 					block: JSON.parse(JSON.stringify(b)),
 					onClickCallBack: this.onBlockClick.bind(this),
-					animationTextures: []
 				});
 			this.addChild(block);
 			this.blocks.push(block);

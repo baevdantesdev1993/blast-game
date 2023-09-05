@@ -26,3 +26,4 @@ export const GREY_COLOR = '#ededed';
 // --- colors ---
 
 export const FPS = 60;
+export const MILLISECONDS_IN_FRAME = 1000 / FPS;

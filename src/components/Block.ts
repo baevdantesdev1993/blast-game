@@ -1,16 +1,17 @@
 import {IBlock, IPosition, IRenderParams} from '../interfaces';
-import {Sprite, Texture} from 'pixi.js';
+import {Sprite} from 'pixi.js';
 import {loader} from '../index';
+import AnimationService from '../services/AnimationService';
 
 interface IBlockParams extends IRenderParams {
   block: IBlock,
   onClickCallBack: (block: Block) => void
-  animationTextures: Texture[]
 }
 
 export default class Block extends Sprite {
 	private readonly props: IBlock;
 	private readonly onClickCallback: (block: Block) => void;
+	private animationService: AnimationService;
  
 	public get properties() {
 		return this.props;
@@ -18,6 +19,7 @@ export default class Block extends Sprite {
  
 	constructor(params: IBlockParams) {
 		super();
+		this.animationService = new AnimationService();
 		this.props = params.block;
 		this.x = params.position.x;
 		this.y = params.position.y;
@@ -38,19 +40,18 @@ export default class Block extends Sprite {
 		this.create();
 	}
  
-	public remove() {
+	public async remove() {
+		await this.animationService.removeBlock(this);
 		this.destroy();
 	}
  
-	public moveTo(position: IPosition, realPosition: IPosition) {
-		const size = {
-			width: this.width,
-			height: this.height
-		};
+	private setPosition(position: IPosition) {
 		this.props.position = position;
-		this.setTransform(realPosition.x, realPosition.y);
-		this.width = size.width;
-		this.height = size.height;
+	}
+ 
+	public async moveTo(position: IPosition, realPosition: IPosition) {
+		this.setPosition(position);
+		await this.animationService.moveBlockToTheBottom(this, realPosition);
 	}
  
 	private onClick() {
@@ -73,7 +74,7 @@ export default class Block extends Sprite {
 		this.alpha = 1;
 	}
  
-	private create() {
+	public create() {
 		this.texture = loader.blocksTextures[this.props.color];
 	}
 }

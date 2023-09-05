@@ -24,7 +24,7 @@ export const renderApp = (reRender = false) => {
 		mainView.reCreate();
 		return;
 	}
-  
+ 
 	mainView.create();
 };
 
