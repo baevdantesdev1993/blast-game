@@ -1,6 +1,6 @@
 import {Container, Graphics, Text} from 'pixi.js';
-import {gameModel} from '../index';
-import {GREEN_COLOR, PROGRESS_BAR_WIDTH, WIN_POINTS} from '../constants';
+import {gameModel, progressbarWidthValue} from '../index';
+import {GREEN_COLOR, WIN_POINTS} from '../constants';
 import {IRenderParams} from '../interfaces';
 import {Align} from '../types';
 import ProgressBar from './ProgressBar';
@@ -38,7 +38,7 @@ export default class PointsDisplay extends Container {
  
 	private renderProgressBar() {
 		this.progressBar = new ProgressBar({
-			width: PROGRESS_BAR_WIDTH,
+			width: progressbarWidthValue,
 			height: 20,
 			position: {
 				x: 0,

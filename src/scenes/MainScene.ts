@@ -1,7 +1,7 @@
 import {IBlock, IMoveBlock, IPosition} from '../interfaces';
-import {BLOCK_SIZE, COMMON_PADDING, FIELD_PADDING, FIELD_SIZE} from '../constants';
+import {COMMON_PADDING, FIELD_PADDING, MOBILE_BREAKPOINT} from '../constants';
 import Block from '../components/Block';
-import {app, gameModel} from '../index';
+import {app, blockSizeVal, fieldSizeVal, gameModel} from '../index';
 import delay from '../utils/delay';
 import comparePositions from '../utils/comparePositions';
 import PointsDisplay from '../components/PointsDisplay';
@@ -80,8 +80,12 @@ export default class MainScene extends Container {
  
 	private getBlockPosition(pos: IPosition) {
 		return {
-			x: (this.field.x - FIELD_SIZE / 2) + (pos.x * BLOCK_SIZE) + FIELD_PADDING - BLOCK_SIZE,
-			y: (this.field.y - FIELD_SIZE / 2) + (pos.y * BLOCK_SIZE) + FIELD_PADDING - BLOCK_SIZE
+			x: (this.field.x - fieldSizeVal / 2)
+        + (pos.x * blockSizeVal)
+        + FIELD_PADDING - blockSizeVal,
+			y: (this.field.y - fieldSizeVal / 2)
+        + (pos.y * blockSizeVal)
+        + FIELD_PADDING - blockSizeVal
 		};
 	}
  
@@ -90,8 +94,8 @@ export default class MainScene extends Container {
 			const blockScene = new Block(
 				{
 					position: this.getBlockPosition(block.position),
-					width: BLOCK_SIZE,
-					height: BLOCK_SIZE,
+					width: blockSizeVal,
+					height: blockSizeVal,
 					block: JSON.parse(JSON.stringify(block)),
 					onClickCallBack: this.onBlockClick.bind(this),
 				});
@@ -148,8 +152,8 @@ export default class MainScene extends Container {
 			const block = new Block(
 				{
 					position: this.getBlockPosition(b.position),
-					width: BLOCK_SIZE,
-					height: BLOCK_SIZE,
+					width: blockSizeVal,
+					height: blockSizeVal,
 					block: JSON.parse(JSON.stringify(b)),
 					onClickCallBack: this.onBlockClick.bind(this),
 				});
@@ -161,7 +165,7 @@ export default class MainScene extends Container {
 	private renderPointsDisplay() {
 		this.pointsDisplay = new PointsDisplay({
 			position: {
-				x: app.renderer.width / 2 - FIELD_SIZE / 2 + FIELD_PADDING,
+				x: app.renderer.width / 2 - fieldSizeVal / 2 + FIELD_PADDING,
 				y: COMMON_PADDING
 			},
 		}, 'left');
@@ -171,7 +175,7 @@ export default class MainScene extends Container {
 	private renderTurnsDisplay() {
 		this.turnsDisplay = new TurnsDisplay({
 			position: {
-				x: app.renderer.width / 2 + FIELD_SIZE / 2 - FIELD_PADDING,
+				x: app.renderer.width / 2 + fieldSizeVal / 2 - FIELD_PADDING,
 				y: COMMON_PADDING
 			},
 		}, 'right');
@@ -181,7 +185,7 @@ export default class MainScene extends Container {
 	private renderMixesDisplay() {
 		this.mixesDisplay = new MixesDisplay({
 			position: {
-				x: app.renderer.width / 2 - FIELD_SIZE / 2 + FIELD_PADDING,
+				x: app.renderer.width / 2 - fieldSizeVal / 2 + FIELD_PADDING,
 				y: app.renderer.height - COMMON_PADDING * 4
 			},
 		}, 'left');
@@ -192,7 +196,7 @@ export default class MainScene extends Container {
 		this.gameResult = new GameResult({
 			position: {
 				x: app.renderer.width / 2,
-				y: COMMON_PADDING
+				y: app.renderer.width <= MOBILE_BREAKPOINT ? 100 : 100
 			},
 		});
 		this.gameResult.create(gameStatus);
@@ -205,8 +209,8 @@ export default class MainScene extends Container {
 				x: app.renderer.width / 2,
 				y: app.renderer.height / 2
 			},
-			width: FIELD_SIZE,
-			height: FIELD_SIZE,
+			width: fieldSizeVal,
+			height: fieldSizeVal,
 			anchor: {
 				x: 0.5,
 				y: 0.5
@@ -217,10 +221,10 @@ export default class MainScene extends Container {
  
 	public create() {
 		this.renderField();
+		this.renderBlocks();
 		this.renderPointsDisplay();
 		this.renderTurnsDisplay();
 		this.renderMixesDisplay();
-		this.renderBlocks();
 		app.stage.addChild(this);
 	}
 }

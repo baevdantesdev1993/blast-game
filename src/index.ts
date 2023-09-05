@@ -1,7 +1,7 @@
 import {Application} from 'pixi.js';
 import MainScene from './scenes/MainScene';
 import {GameModel} from './models/GameModel';
-import {BLOCK_SIZE, BLOCKS_QUANTITY, FIELD_SIZE} from './constants';
+import {BLOCKS_QUANTITY} from './constants';
 import LoaderService from './services/LoaderService';
 
 export const app = new Application<HTMLCanvasElement>({
@@ -12,12 +12,7 @@ export const app = new Application<HTMLCanvasElement>({
 window.onload = () => document.getElementById('app').appendChild(app.view);
 
 export const gameModel = new GameModel(BLOCKS_QUANTITY);
-export const loaderService = new LoaderService(
-	{
-		blockSize: BLOCK_SIZE,
-		fieldSize: FIELD_SIZE
-	}
-);
+export const loaderService = new LoaderService();
 const mainView = new MainScene();
 export const renderApp = (reRender = false) => {
 	if (reRender) {
@@ -34,3 +29,5 @@ const init = async () => {
 };
 
 init();
+
+export const {blockSizeVal, fieldSizeVal, progressbarWidthValue} = loaderService;
