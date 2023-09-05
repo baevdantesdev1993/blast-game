@@ -1,6 +1,6 @@
 import {IBlock, IPosition, IRenderParams} from '../interfaces';
 import {Sprite} from 'pixi.js';
-import {loader} from '../index';
+import {loaderService} from '../index';
 import AnimationService from '../services/AnimationService';
 
 interface IBlockParams extends IRenderParams {
@@ -75,6 +75,6 @@ export default class Block extends Sprite {
 	}
  
 	public create() {
-		this.texture = loader.blocksTextures[this.props.color];
+		this.texture = loaderService.blocksTextures[this.props.color];
 	}
 }

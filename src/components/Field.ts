@@ -1,6 +1,6 @@
 import {IRenderParams} from '../interfaces';
 import {Sprite} from 'pixi.js';
-import {loader} from '../index';
+import {loaderService} from '../index';
 
 
 export default class Field extends Sprite {
@@ -12,6 +12,6 @@ export default class Field extends Sprite {
 		this.height = renderParams.height;
 		this.anchor.x = renderParams.anchor.x;
 		this.anchor.y = renderParams.anchor.y;
-		this.texture = loader.fieldTexture;
+		this.texture = loaderService.fieldTexture;
 	}
 }

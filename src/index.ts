@@ -12,7 +12,7 @@ export const app = new Application<HTMLCanvasElement>({
 window.onload = () => document.getElementById('app').appendChild(app.view);
 
 export const gameModel = new GameModel(BLOCKS_QUANTITY);
-export const loader = new LoaderService(
+export const loaderService = new LoaderService(
 	{
 		blockSize: BLOCK_SIZE,
 		fieldSize: FIELD_SIZE
@@ -29,7 +29,7 @@ export const renderApp = (reRender = false) => {
 };
 
 const init = async () => {
-	await loader.init();
+	await loaderService.init();
 	renderApp();
 };
 
