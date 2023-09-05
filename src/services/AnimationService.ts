@@ -2,7 +2,7 @@ import Block from '../components/Block';
 import {IPosition} from '../interfaces';
 
 export default class AnimationService {
-	public async moveBlockToTheBottom(block: Block, position: IPosition, duration = 400) {
+	public async moveBlockToTheBottom(block: Block, position: IPosition, duration = 300) {
 		return new Promise<void>((res) => {
 			let startTime: number = null;
 			const distance = position.y - block.y;
