@@ -21,7 +21,6 @@ export default class AnimationService {
 					} else {
 						block.y += step;
 					}
-					console.log(block.y > position.y);
 					requestAnimationFrame(animateStep);
 				} else {
 					res();
