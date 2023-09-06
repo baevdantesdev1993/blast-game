@@ -196,7 +196,7 @@ export default class MainScene extends Container {
 		this.gameResult = new GameResult({
 			position: {
 				x: app.renderer.width / 2,
-				y: app.renderer.width <= MOBILE_BREAKPOINT ? 100 : 100
+				y: app.renderer.width <= MOBILE_BREAKPOINT ? 70 : 100
 			},
 		});
 		this.gameResult.create(gameStatus);
