@@ -123,12 +123,12 @@ export default class Main extends Container {
 			}
 			const {gameStatus} = res;
 			if (gameStatus === 'mix') {
-				await this.reGenerateField(true);
-				this.mixesDisplay.reCreate();
+				this.reGenerateField(true);
 				this.renderGameResult(gameStatus);
+				this.mixesDisplay.reCreate();
 			}
 			if (gameStatus === 'loss' || gameStatus === 'win') {
-				await this.reGenerateField();
+				this.reGenerateField();
 				this.renderGameResult(gameStatus);
 			}
 		} catch (e) {
@@ -228,10 +228,10 @@ export default class Main extends Container {
  
 	public async  create() {
 		this.renderField();
-		await this.renderBlocks();
 		this.renderPointsDisplay();
 		this.renderTurnsDisplay();
 		this.renderMixesDisplay();
+		await this.renderBlocks();
 		app.stage.addChild(this);
 	}
 }
