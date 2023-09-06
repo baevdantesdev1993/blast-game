@@ -12,7 +12,7 @@ import MixesDisplay from '../components/MixesDisplay';
 import GameResult from '../components/GameResult';
 import {GameStatus} from '../types';
 
-export default class MainScene extends Container {
+export default class Main extends Container {
 	private blocks: Block[] = [];
 	private pointsDisplay: PointsDisplay;
 	private turnsDisplay: TurnsDisplay;
@@ -28,11 +28,11 @@ export default class MainScene extends Container {
 		document.getElementById('app').style.pointerEvents = flag ? 'none' : 'all';
 	}
  
-	private reGenerateField(afterMix = false) {
+	private async reGenerateField(afterMix = false) {
 		if (!afterMix) {
 			gameModel.generateBlocks();
 		}
-		this.reCreate();
+		await this.reCreate();
 	}
  
 	private reRenderAllTheDisplays() {
@@ -123,12 +123,12 @@ export default class MainScene extends Container {
 			}
 			const {gameStatus} = res;
 			if (gameStatus === 'mix') {
-				this.reGenerateField(true);
+				await this.reGenerateField(true);
 				this.mixesDisplay.reCreate();
 				this.renderGameResult(gameStatus);
 			}
 			if (gameStatus === 'loss' || gameStatus === 'win') {
-				this.reGenerateField();
+				await this.reGenerateField();
 				this.renderGameResult(gameStatus);
 			}
 		} catch (e) {
@@ -145,24 +145,28 @@ export default class MainScene extends Container {
 		this.removeChildren(0, this.children.length);
 	}
  
-	public reCreate() {
+	public async reCreate() {
 		this.remove();
-		this.create();
+		await this.create();
 	}
  
-	private renderBlocks() {
-		gameModel.blocks.forEach((b) => {
-			const block = new Block(
-				{
-					position: this.getBlockPosition(b.position),
-					width: blockSizeVal,
-					height: blockSizeVal,
-					block: JSON.parse(JSON.stringify(b)),
-					onClickCallBack: this.onBlockClick.bind(this),
-				});
-			this.addChild(block);
-			this.blocks.push(block);
-		});
+	private async renderBlocks() {
+		return Promise.all(
+			gameModel.blocks.map(async (b) => {
+				const block = new Block(
+					{
+						position: this.getBlockPosition(b.position),
+						width: blockSizeVal,
+						height: blockSizeVal,
+						block: JSON.parse(JSON.stringify(b)),
+						onClickCallBack: this.onBlockClick.bind(this),
+					});
+				this.addChild(block);
+				await block.addBlock();
+				this.blocks.push(block);
+				return block;
+			})
+		);
 	}
  
 	private renderPointsDisplay() {
@@ -222,9 +226,9 @@ export default class MainScene extends Container {
 		this.addChild(this.field);
 	}
  
-	public create() {
+	public async  create() {
 		this.renderField();
-		this.renderBlocks();
+		await this.renderBlocks();
 		this.renderPointsDisplay();
 		this.renderTurnsDisplay();
 		this.renderMixesDisplay();

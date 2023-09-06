@@ -1,5 +1,5 @@
 import {Application} from 'pixi.js';
-import MainScene from './scenes/MainScene';
+import Main from './scenes/Main';
 import {GameModel} from './models/GameModel';
 import {BLOCKS_QUANTITY} from './constants';
 import LoaderService from './services/LoaderService';
@@ -13,9 +13,9 @@ window.onload = () => document.getElementById('app').appendChild(app.view);
 
 export const gameModel = new GameModel(BLOCKS_QUANTITY);
 export const loaderService = new LoaderService();
-const mainView = new MainScene();
-const renderApp = () => {
-	mainView.create();
+const main = new Main();
+const renderApp = async () => {
+	await main.create();
 };
 
 const init = async () => {
