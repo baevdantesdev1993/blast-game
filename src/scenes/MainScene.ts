@@ -89,19 +89,23 @@ export default class MainScene extends Container {
 		};
 	}
  
-	private addBlocks(blocksToBeAdded: IBlock[]) {
-		blocksToBeAdded.forEach((block) => {
-			const blockScene = new Block(
-				{
-					position: this.getBlockPosition(block.position),
-					width: blockSizeVal,
-					height: blockSizeVal,
-					block: JSON.parse(JSON.stringify(block)),
-					onClickCallBack: this.onBlockClick.bind(this),
-				});
-			this.blocks.push(blockScene);
-			this.addChild(blockScene);
-		});
+	private async addBlocks(blocksToBeAdded: IBlock[]) {
+		return Promise.all(
+			blocksToBeAdded.map(async (blockItem) => {
+				const block = new Block(
+					{
+						position: this.getBlockPosition(blockItem.position),
+						width: blockSizeVal,
+						height: blockSizeVal,
+						block: JSON.parse(JSON.stringify(blockItem)),
+						onClickCallBack: this.onBlockClick.bind(this),
+					});
+				this.blocks.push(block);
+				this.addChild(block);
+				//await block.addBlock();
+				return block;
+			})
+		);
 	}
  
 	public async onBlockClick(block: Block) {
@@ -112,9 +116,9 @@ export default class MainScene extends Container {
 				await this.removeBlocks(res.stages.remove.removedBlocks);
 				if (res.stages.move.movedBlocks.length) {
 					await this.moveBlocks(res.stages.move.movedBlocks);
-					await delay(200);
 				}
-				this.addBlocks(res.stages.add.addedBlocks);
+				await delay(200);
+				await this.addBlocks(res.stages.add.addedBlocks);
 			}
 			const {gameStatus} = res;
 			if (gameStatus === 'mix') {

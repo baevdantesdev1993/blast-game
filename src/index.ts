@@ -14,12 +14,7 @@ window.onload = () => document.getElementById('app').appendChild(app.view);
 export const gameModel = new GameModel(BLOCKS_QUANTITY);
 export const loaderService = new LoaderService();
 const mainView = new MainScene();
-export const renderApp = (reRender = false) => {
-	if (reRender) {
-		mainView.reCreate();
-		return;
-	}
-  
+const renderApp = () => {
 	mainView.create();
 };
 

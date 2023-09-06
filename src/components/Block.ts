@@ -73,6 +73,10 @@ export default class Block extends Sprite {
 	private onPointerLeave() {
 		this.alpha = 1;
 	}
+	
+	public async addBlock() {
+		await this.animationService.createBlock(this);
+	}
  
 	public create() {
 		this.texture = loaderService.blocksTextures[this.props.color];
