@@ -90,7 +90,7 @@ export default class MainScene extends Container {
 	}
  
 	private async addBlocks(blocksToBeAdded: IBlock[]) {
-		return Promise.all(
+		await Promise.all(
 			blocksToBeAdded.map(async (blockItem) => {
 				const block = new Block(
 					{
@@ -102,7 +102,7 @@ export default class MainScene extends Container {
 					});
 				this.blocks.push(block);
 				this.addChild(block);
-				//await block.addBlock();
+				await block.addBlock();
 				return block;
 			})
 		);
@@ -117,20 +117,19 @@ export default class MainScene extends Container {
 				if (res.stages.move.movedBlocks.length) {
 					await this.moveBlocks(res.stages.move.movedBlocks);
 				}
-				await delay(200);
+				await delay(100);
 				await this.addBlocks(res.stages.add.addedBlocks);
+				await delay(100);
 			}
 			const {gameStatus} = res;
 			if (gameStatus === 'mix') {
 				this.reGenerateField(true);
 				this.mixesDisplay.reCreate();
 				this.renderGameResult(gameStatus);
-				return;
 			}
 			if (gameStatus === 'loss' || gameStatus === 'win') {
 				this.reGenerateField();
 				this.renderGameResult(gameStatus);
-				return;
 			}
 		} catch (e) {
 			console.error(e);

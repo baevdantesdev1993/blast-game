@@ -3,7 +3,7 @@ import {IPosition} from '../interfaces';
 
 export default class AnimationService {
 	public async moveBlockToTheBottom(block: Block, position: IPosition, duration = 300) {
-		return new Promise<void>((res) => {
+		return new Promise<void>((resolve) => {
 			let startTime: number = null;
 			const distance = position.y - block.y;
 			let lastTimestamp = performance.now();
@@ -24,7 +24,7 @@ export default class AnimationService {
 					requestAnimationFrame(animateStep);
 				} else {
 					block.y = position.y;
-					res();
+					resolve();
 				}
 			};
    
@@ -32,7 +32,7 @@ export default class AnimationService {
 		});
 	}
  
-	public async removeBlock(block: Block, duration = 200) {
+	public async removeBlock(block: Block, duration = 300) {
 		const initialWidth = block.width;
 		return new Promise<void>((res) => {
 			let start: number = null;
@@ -60,17 +60,17 @@ export default class AnimationService {
 		});
 	}
  
-	public async createBlock(block: Block, duration = 200) {
+	public async createBlock(block: Block, duration = 300) {
 		const finalWidth = block.width;
 		const finalHeight = block.height;
 		const finalPos: IPosition = {
 			x: block.x,
 			y: block.y
 		};
-		block.width = 0;
-		block.height = 0;
-		block.x = block.x + finalWidth / 2;
-		block.y = block.y + finalHeight / 2;
+		block.width = 10;
+		block.height = 10;
+		block.x = block.x + finalWidth / 2 - 5;
+		block.y = block.y + finalHeight / 2 - 5;
 		return new Promise<void>((res) => {
 			let start: number = null;
 			let lastTimestamp = performance.now(); // current timestamp value
