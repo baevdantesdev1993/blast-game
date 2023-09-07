@@ -1,5 +1,5 @@
 import {Text, TextStyle} from 'pixi.js';
-import {GREEN_COLOR, RED_COLOR} from '../constants';
+import {SUCCESS_COLOR, ALARM_COLOR} from '../constants';
 import {GameStatus} from '../types';
 import {IRenderParams} from '../interfaces';
 
@@ -16,7 +16,7 @@ export default class GameResult extends Text {
 	public create(gameStatus: GameStatus) {
 		const style = new TextStyle({
 			fill: gameStatus === 'win' || gameStatus === 'mix'
-				? GREEN_COLOR : RED_COLOR
+				? SUCCESS_COLOR : ALARM_COLOR
 		});
 		const statusMap: Record<GameStatus, string> = {
 			win: 'Win!',

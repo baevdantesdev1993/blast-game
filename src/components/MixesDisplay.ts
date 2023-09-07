@@ -1,6 +1,6 @@
 import {Container, Graphics, Text} from 'pixi.js';
 import {app, displayFontStyleValue, gameModel, progressbarWidthValue} from '../index';
-import {MAX_MIXES, MOBILE_BREAKPOINT, RED_COLOR} from '../constants';
+import {MAX_MIXES, MOBILE_BREAKPOINT, ALARM_COLOR} from '../constants';
 import {IRenderParams} from '../interfaces';
 import {Align} from '../types';
 import ProgressBar from './ProgressBar';
@@ -46,7 +46,7 @@ export default class MixesDisplay extends Container {
 				y: app.renderer.width <= MOBILE_BREAKPOINT ? 22 : 35
 			},
 			align: 'left',
-			color: RED_COLOR,
+			color: ALARM_COLOR,
 			filledPercent: (gameModel.mixes / MAX_MIXES)
 		});
 		this.addChild(this.progressBar);

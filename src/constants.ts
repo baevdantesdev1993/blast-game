@@ -16,7 +16,8 @@ export const WIN_POINTS = BLASTED_BLOCKS_COUNT * 10;
 // --- main settings for game ---
 
 // --- colors ---
-export const GREEN_COLOR = '#509332';
-export const RED_COLOR = '#dc3b57';
+export const SUCCESS_COLOR = '#509332';
+export const ALARM_COLOR = '#dc3b57';
 export const GREY_COLOR = '#ededed';
+export const PRIMARY_COLOR = '#0a4dbe';
 // --- colors ---

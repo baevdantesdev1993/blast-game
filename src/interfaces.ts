@@ -1,5 +1,6 @@
 import {BlockColor} from './utils/blocksMap';
 import {GameStatus} from './types';
+import {Container} from 'pixi.js';
 
 export interface IBaseComponent {
   render: (arg: never) => void
@@ -58,3 +59,6 @@ export interface ITurnResult {
   }
 }
 
+export interface IScene extends Container {
+  init: () => void | Promise<void>
+}

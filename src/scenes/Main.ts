@@ -1,4 +1,4 @@
-import {IBlock, IMoveBlock, IPosition} from '../interfaces';
+import {IBlock, IMoveBlock, IPosition, IScene} from '../interfaces';
 import {COMMON_PADDING, FIELD_PADDING, MOBILE_BREAKPOINT} from '../constants';
 import Block from '../components/Block';
 import {app, blockSizeVal, fieldSizeVal, gameModel} from '../index';
@@ -12,7 +12,7 @@ import MixesDisplay from '../components/MixesDisplay';
 import GameResult from '../components/GameResult';
 import {GameStatus} from '../types';
 
-export default class Main extends Container {
+export default class Main extends Container implements IScene {
 	private blocks: Block[] = [];
 	private pointsDisplay: PointsDisplay;
 	private turnsDisplay: TurnsDisplay;
@@ -147,7 +147,7 @@ export default class Main extends Container {
  
 	public async reCreate() {
 		this.remove();
-		await this.create();
+		await this.init();
 	}
  
 	private async renderBlocks() {
@@ -226,7 +226,7 @@ export default class Main extends Container {
 		this.addChild(this.field);
 	}
  
-	public async  create() {
+	public async init() {
 		this.renderField();
 		this.renderPointsDisplay();
 		this.renderTurnsDisplay();

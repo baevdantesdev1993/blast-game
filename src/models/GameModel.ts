@@ -123,7 +123,6 @@ export class GameModel {
 				color: getRandomBlockColor(),
 				position: currentPosition,
 				superBoost: getSuperBoostRandom(),
-				empty: false
 			};
 		});
   
