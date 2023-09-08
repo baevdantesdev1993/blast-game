@@ -139,31 +139,28 @@ export default class Main extends Container implements IScene {
 			}
 			const {gameStatus} = res;
 			if (gameStatus === 'mix') {
-				this.reGenerateField(true);
 				this.renderGameResult(gameStatus);
+				await this.reGenerateField(true);
 				this.mixesDisplay.reCreate();
 			}
 			if (gameStatus === 'loss' || gameStatus === 'win') {
-				this.reGenerateField();
 				this.renderGameResult(gameStatus);
+				await this.reGenerateField();
 			}
 		} catch (e) {
 			console.error(e);
 		} finally {
-			this.pointsDisplay.update({
-				content: `Points: ${gameModel.points}/${WIN_POINTS}`,
-				filledPercent: (gameModel.points / WIN_POINTS)
-			});
 			this.updateDisplays();
 			this.disableField(false);
 		}
 	}
  
 	public async reCreate() {
-		this.blocks.forEach((b) => b.remove());
+		this.blocks.forEach((block) => {
+			block.destroy();
+		});
 		this.blocks = [];
-		this.removeChildren(0, this.children.length);
-		await this.init();
+		await this.renderBlocks();
 	}
  
 	private async renderBlocks() {

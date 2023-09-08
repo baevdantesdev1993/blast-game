@@ -3,7 +3,6 @@ import {GameModel} from './models/GameModel';
 import {BLOCKS_QUANTITY} from './constants';
 import LoaderService from './services/LoaderService';
 import SceneService from './services/SceneService';
-import delay from './utils/delay';
 
 export const app = new Application<HTMLCanvasElement>({
 	background: '#bebebe',
@@ -19,7 +18,6 @@ export const loaderService = new LoaderService();
 const init = async () => {
 	sceneService.goTo('loading');
 	await loaderService.init();
-	await delay(700);
 	await sceneService.goTo('main');
 };
 
