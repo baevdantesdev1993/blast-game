@@ -1,22 +1,29 @@
 import {IBlock, IMoveBlock, IPosition, IScene} from '../interfaces';
-import {COMMON_PADDING, FIELD_PADDING, MOBILE_BREAKPOINT} from '../constants';
+import {
+	ALARM_COLOR,
+	FIELD_PADDING,
+	MAX_MIXES,
+	MAX_TURNS,
+	MD_DISTANCE,
+	MOBILE_BREAKPOINT,
+	SUCCESS_COLOR,
+	WIN_POINTS
+} from '../constants';
 import Block from '../components/Block';
 import {app, blockSizeVal, fieldSizeVal, gameModel} from '../index';
 import delay from '../utils/delay';
 import comparePositions from '../utils/comparePositions';
-import PointsDisplay from '../components/PointsDisplay';
+import Display from '../components/Display';
 import Field from '../components/Field';
 import {Container} from 'pixi.js';
-import TurnsDisplay from '../components/TurnsDisplay';
-import MixesDisplay from '../components/MixesDisplay';
 import GameResult from '../components/GameResult';
 import {GameStatus} from '../types';
 
 export default class Main extends Container implements IScene {
 	private blocks: Block[] = [];
-	private pointsDisplay: PointsDisplay;
-	private turnsDisplay: TurnsDisplay;
-	private mixesDisplay: MixesDisplay;
+	private pointsDisplay: Display;
+	private turnsDisplay: Display;
+	private mixesDisplay: Display;
 	private gameResult: GameResult;
 	private field: Field;
  
@@ -35,10 +42,19 @@ export default class Main extends Container implements IScene {
 		await this.reCreate();
 	}
  
-	private reRenderAllTheDisplays() {
-		this.pointsDisplay.reCreate();
-		this.turnsDisplay.reCreate();
-		this.mixesDisplay.reCreate();
+	private updateDisplays() {
+		this.pointsDisplay.update({
+			content: `Points: ${gameModel.points}/${WIN_POINTS}`,
+			filledPercent: (gameModel.points / WIN_POINTS)
+		});
+		this.turnsDisplay.update({
+			content: `Turns: ${gameModel.turns}/${MAX_TURNS}`,
+			filledPercent: (gameModel.turns / MAX_TURNS)
+		});
+		this.mixesDisplay.update({
+			content: `Mixes: ${gameModel.mixes}/${MAX_MIXES}`,
+			filledPercent: (gameModel.mixes / MAX_MIXES)
+		});
 	}
  
 	private async removeBlocks(blocksToBeRemoved: IBlock[]) {
@@ -134,19 +150,19 @@ export default class Main extends Container implements IScene {
 		} catch (e) {
 			console.error(e);
 		} finally {
-			this.reRenderAllTheDisplays();
+			this.pointsDisplay.update({
+				content: `Points: ${gameModel.points}/${WIN_POINTS}`,
+				filledPercent: (gameModel.points / WIN_POINTS)
+			});
+			this.updateDisplays();
 			this.disableField(false);
 		}
 	}
  
-	public remove() {
+	public async reCreate() {
 		this.blocks.forEach((b) => b.remove());
 		this.blocks = [];
 		this.removeChildren(0, this.children.length);
-	}
- 
-	public async reCreate() {
-		this.remove();
 		await this.init();
 	}
  
@@ -170,32 +186,44 @@ export default class Main extends Container implements IScene {
 	}
  
 	private renderPointsDisplay() {
-		this.pointsDisplay = new PointsDisplay({
+		this.pointsDisplay = new Display({
 			position: {
 				x: app.renderer.width / 2 - fieldSizeVal / 2 + FIELD_PADDING,
-				y: COMMON_PADDING
+				y: MD_DISTANCE
 			},
-		}, 'left');
+			align: 'left',
+			content: `Points: ${gameModel.points}/${WIN_POINTS}`,
+			color: SUCCESS_COLOR,
+			filledPercent: (gameModel.points / WIN_POINTS)
+		});
 		this.addChild(this.pointsDisplay);
 	}
  
 	private renderTurnsDisplay() {
-		this.turnsDisplay = new TurnsDisplay({
+		this.turnsDisplay = new Display({
 			position: {
 				x: app.renderer.width / 2 + fieldSizeVal / 2 - FIELD_PADDING,
-				y: COMMON_PADDING
+				y: MD_DISTANCE
 			},
-		}, 'right');
+			align: 'right',
+			content: `Turns: ${gameModel.turns}/${MAX_TURNS}`,
+			color: ALARM_COLOR,
+			filledPercent: (gameModel.turns / MAX_TURNS)
+		});
 		this.addChild(this.turnsDisplay);
 	}
  
 	private renderMixesDisplay() {
-		this.mixesDisplay = new MixesDisplay({
+		this.mixesDisplay = new Display({
 			position: {
 				x: app.renderer.width / 2 - fieldSizeVal / 2 + FIELD_PADDING,
-				y: app.renderer.height - COMMON_PADDING * 4
+				y: app.renderer.height - MD_DISTANCE * 4
 			},
-		}, 'left');
+			align: 'left',
+			content: `Mixes: ${gameModel.mixes}/${MAX_MIXES}`,
+			color: ALARM_COLOR,
+			filledPercent: (gameModel.mixes / MAX_MIXES)
+		});
 		this.addChild(this.mixesDisplay);
 	}
  

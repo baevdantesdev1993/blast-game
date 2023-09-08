@@ -2,7 +2,7 @@ import {Assets, TextStyle, Texture} from 'pixi.js';
 import blocksMap, {BlockColor} from '../utils/blocksMap';
 import FieldImage from '../assets/field.png';
 import {app} from '../index';
-import {BLOCKS_IN_COLUMN, COMMON_PADDING, FIELD_PADDING, MAX_FIELD_SIZE, MOBILE_BREAKPOINT} from '../constants';
+import {BLOCKS_IN_COLUMN, MD_DISTANCE, FIELD_PADDING, MAX_FIELD_SIZE, MOBILE_BREAKPOINT} from '../constants';
 
 export default class LoaderService {
 	private blocks: Record<BlockColor, Texture>;
@@ -59,8 +59,8 @@ export default class LoaderService {
  
 	private initSizes() {
 		this.fieldSize = app.renderer.width >= MAX_FIELD_SIZE
-			? MAX_FIELD_SIZE - (COMMON_PADDING * 2)
-			: app.renderer.width - (COMMON_PADDING * 2);
+			? MAX_FIELD_SIZE - (MD_DISTANCE * 2)
+			: app.renderer.width - (MD_DISTANCE * 2);
 		this.blockSize = (this.fieldSize - FIELD_PADDING * 2) / BLOCKS_IN_COLUMN;
 		if (app.renderer.width <= MOBILE_BREAKPOINT) {
 			this.progressbarWidth = 140;

@@ -19,6 +19,7 @@ export const loaderService = new LoaderService();
 const init = async () => {
 	sceneService.goTo('loading');
 	await loaderService.init();
+	await delay(700);
 	await sceneService.goTo('main');
 };
 

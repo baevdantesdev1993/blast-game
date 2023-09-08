@@ -3,7 +3,7 @@ export const BLOCKS_IN_COLUMN = BLOCKS_IN_ROW;
 export const FIELD_PADDING = 15;
 export const MAX_FIELD_SIZE = 500 + FIELD_PADDING * 2;
 export const BLOCKS_QUANTITY = BLOCKS_IN_ROW * BLOCKS_IN_COLUMN;
-export const COMMON_PADDING = 20;
+export const MD_DISTANCE = 20;
 export const MOBILE_BREAKPOINT = 800;
 
 
