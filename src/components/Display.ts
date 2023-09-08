@@ -1,4 +1,4 @@
-import {Container, Graphics, Text} from 'pixi.js';
+import {Container, Text} from 'pixi.js';
 import {app, displayFontStyleValue, progressbarWidthValue} from '../index';
 import {MOBILE_BREAKPOINT} from '../constants';
 import {IRenderParams} from '../interfaces';
@@ -14,7 +14,7 @@ interface IDisplayParams extends IRenderParams {
 
 export default class Display extends Container {
 	private text: Text;
-	private progressBar: Graphics;
+	private progressBar: ProgressBar;
 	private params: IDisplayParams;
  
 	constructor(params: IDisplayParams) {
@@ -25,11 +25,11 @@ export default class Display extends Container {
 		this.create();
 	}
  
-	public update(params: Pick<IDisplayParams, 'content' | 'filledPercent'>) {
+	public async update(params: Pick<IDisplayParams, 'content' | 'filledPercent'>) {
 		this.params.content = params.content;
 		this.params.filledPercent = params.filledPercent;
 		this.renderText(true);
-		this.renderProgressBar();
+		await this.progressBar.update(this.params.filledPercent);
 	}
  
 	public reCreate() {
@@ -54,10 +54,7 @@ export default class Display extends Container {
 		this.addChild(this.text);
 	}
  
-	private renderProgressBar(reRender = false) {
-		if (reRender) {
-			this.progressBar.destroy();
-		}
+	private renderProgressBar() {
 		this.progressBar = new ProgressBar({
 			width: progressbarWidthValue,
 			height: 20,

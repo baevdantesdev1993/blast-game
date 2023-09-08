@@ -1,7 +1,8 @@
-import {Graphics} from 'pixi.js';
+import {Container, Graphics} from 'pixi.js';
 import {IRenderParams} from '../interfaces';
 import {GREY_COLOR} from '../constants';
 import {Align} from '../types';
+import AnimationService from '../services/AnimationService';
 
 export interface IProgressBarParams extends IRenderParams {
   align: Align,
@@ -9,12 +10,15 @@ export interface IProgressBarParams extends IRenderParams {
   filledPercent: number
 }
 
-export default class ProgressBar extends Graphics {
-	align: Align = 'left';
-	filledPercent: number;
-	color: string;
-	progressBarWidth: number;
-	progressBarHeight: number;
+export default class ProgressBar extends Container {
+	private readonly align: Align = 'left';
+	private filledPercent: number;
+	private readonly color: string;
+	private readonly progressBarWidth: number;
+	private readonly progressBarHeight: number;
+	private animationService: AnimationService;
+	private backgroundBar: Graphics = new Graphics();
+	private progressBar: Graphics = new Graphics();
  
 	constructor(params: IProgressBarParams) {
 		super();
@@ -25,24 +29,39 @@ export default class ProgressBar extends Graphics {
 		this.color = params.color;
 		this.filledPercent = params.filledPercent;
 		this.align = params.align;
+		this.animationService = new AnimationService();
 		this.create();
 	}
  
+	public async update(percent: number) {
+		this.filledPercent = percent;
+		this.progressBar.width = this.backgroundBar.width * this.filledPercent;
+	}
+ 
 	private drawProgressBar(filled = false) {
-		this.beginFill(filled ? this.color : GREY_COLOR);
-		this.drawRect(0,
-			0,
-			filled ? this.progressBarWidth * (this.filledPercent) : this.progressBarWidth,
-			this.progressBarHeight);
-		if (this.align === 'right') {
-			if (filled) {
-				this.x = this.x - this.progressBarWidth;
-			}
+		if (!filled) {
+			this.backgroundBar.beginFill(GREY_COLOR);
+			this.backgroundBar.drawRect(0,
+				0,
+				this.progressBarWidth,
+				this.progressBarHeight);
+			this.backgroundBar.endFill();
+			this.addChild(this.backgroundBar);
+		} else {
+			this.progressBar.beginFill(this.color);
+			this.progressBar.drawRect(0,
+				0,
+				this.progressBarWidth * (this.filledPercent),
+				this.progressBarHeight);
+			this.progressBar.endFill();
+			this.addChild(this.progressBar);
 		}
-		this.endFill();
 	}
  
 	private create() {
+		if (this.align === 'right') {
+			this.x = this.x - this.progressBarWidth;
+		}
 		this.drawProgressBar();
 		this.drawProgressBar(true);
 	}
