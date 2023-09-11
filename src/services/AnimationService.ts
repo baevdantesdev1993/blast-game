@@ -1,5 +1,6 @@
 import Block from '../components/Block';
 import {IPosition} from '../interfaces';
+import {Graphics} from 'pixi.js';
 
 export default class AnimationService {
 	public async moveBlockToTheBottom(block: Block, position: IPosition, duration = 300) {
@@ -60,6 +61,43 @@ export default class AnimationService {
 		});
 	}
  
+	public async updateProgressBar(progressBar: Graphics, targetWidth: number, duration = 500) {
+		return new Promise<void>((resolve) => {
+			let start: number = null;
+			let lastTimestamp = performance.now();
+			const animateStep = (timestamp: DOMHighResTimeStamp) => {
+				const timeDiff = timestamp - lastTimestamp;
+				const frameTime = duration / timeDiff;
+				const step = Number((targetWidth / frameTime).toFixed(2));
+				lastTimestamp = timestamp;
+				if (!start) {
+					start = timestamp;
+				}
+				if (timestamp - start < duration) {
+					if (progressBar.width <= targetWidth) {
+						if (progressBar.width + step >= targetWidth) {
+							progressBar.width = targetWidth;
+						} else {
+							progressBar.width += step;
+						}
+					} else {
+						if (progressBar.width - step <= targetWidth) {
+							progressBar.width = targetWidth;
+						} else {
+							progressBar.width -= step;
+						}
+					}
+					requestAnimationFrame(animateStep);
+				} else {
+					progressBar.width = targetWidth;
+					resolve();
+				}
+			};
+   
+			requestAnimationFrame(animateStep);
+		});
+	}
+ 
 	public async createBlock(block: Block, duration = 300) {
 		const finalWidth = block.width;
 		const finalHeight = block.height;
@@ -73,7 +111,7 @@ export default class AnimationService {
 		block.y = block.y + finalHeight / 2 - 5;
 		return new Promise<void>((res) => {
 			let start: number = null;
-			let lastTimestamp = performance.now(); // current timestamp value
+			let lastTimestamp = performance.now();
 			const animateStep = (timestamp: DOMHighResTimeStamp) => {
 				const timeDiff = timestamp - lastTimestamp;
 				const frameTime = duration / timeDiff;

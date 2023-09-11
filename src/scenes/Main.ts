@@ -42,19 +42,21 @@ export default class Main extends Container implements IScene {
 		await this.reCreate();
 	}
  
-	private updateDisplays() {
-		this.pointsDisplay.update({
-			content: `Points: ${gameModel.points}/${WIN_POINTS}`,
-			filledPercent: (gameModel.points / WIN_POINTS)
-		});
-		this.turnsDisplay.update({
-			content: `Turns: ${gameModel.turns}/${MAX_TURNS}`,
-			filledPercent: (gameModel.turns / MAX_TURNS)
-		});
-		this.mixesDisplay.update({
-			content: `Mixes: ${gameModel.mixes}/${MAX_MIXES}`,
-			filledPercent: (gameModel.mixes / MAX_MIXES)
-		});
+	private async updateDisplays() {
+		await Promise.all([
+			this.pointsDisplay.update({
+				content: `Points: ${gameModel.points}/${WIN_POINTS}`,
+				filledPercent: (gameModel.points / WIN_POINTS)
+			}),
+			this.turnsDisplay.update({
+				content: `Turns: ${gameModel.turns}/${MAX_TURNS}`,
+				filledPercent: (gameModel.turns / MAX_TURNS)
+			}),
+			this.mixesDisplay.update({
+				content: `Mixes: ${gameModel.mixes}/${MAX_MIXES}`,
+				filledPercent: (gameModel.mixes / MAX_MIXES)
+			})
+		]);
 	}
  
 	private async removeBlocks(blocksToBeRemoved: IBlock[]) {
@@ -150,8 +152,8 @@ export default class Main extends Container implements IScene {
 		} catch (e) {
 			console.error(e);
 		} finally {
-			this.updateDisplays();
 			this.disableField(false);
+			await this.updateDisplays();
 		}
 	}
  
@@ -191,7 +193,7 @@ export default class Main extends Container implements IScene {
 			align: 'left',
 			content: `Points: ${gameModel.points}/${WIN_POINTS}`,
 			color: SUCCESS_COLOR,
-			filledPercent: (gameModel.points / WIN_POINTS)
+			filledPercent: 0.001
 		});
 		this.addChild(this.pointsDisplay);
 	}
