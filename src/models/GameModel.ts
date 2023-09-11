@@ -43,7 +43,7 @@ export class GameModel {
   
 		return this.blocksList
 			.some((b) => {
-				const {result} = this.onTryToBlast(b, null, true);
+				const {result} = this.tryToRemove(b, null, true);
 				this.clearBlocksToBeRemoved();
 				return result.length;
 			});
@@ -255,7 +255,7 @@ export class GameModel {
 			let check = true;
 			const res = block.superBoost
 				? this.onSuperBoost(block)
-				: this.onTryToBlast(block, null, false);
+				: this.tryToRemove(block, null, false);
 			this.clearBlocksToBeRemoved();
 			const success = Boolean(!res.isChecking && res.result.length);
 			if (success) {
@@ -325,7 +325,7 @@ export class GameModel {
 				return;
 			}
 			const nextIterationBlocks =
-        this.onTryToBlast(block, excludeDirectionMap[direction], isChecking);
+        this.tryToRemove(block, excludeDirectionMap[direction], isChecking);
 			if (!nextIterationBlocks?.result.length) {
 				return;
 			}
@@ -334,7 +334,7 @@ export class GameModel {
 		return;
 	}
  
-	private onTryToBlast(originalBlock: IBlock,
+	private tryToRemove(originalBlock: IBlock,
 		excludeDirection: BlockDirection,
 		isChecking: boolean): IBlastResult {
 		const foundOriginal = this.blocksList.find((b) =>
