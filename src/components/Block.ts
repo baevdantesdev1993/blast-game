@@ -12,11 +12,11 @@ export default class Block extends Sprite {
 	private readonly props: IBlock;
 	private readonly onClickCallback: (block: Block) => void;
 	private animationService: AnimationService;
- 
+
 	public get properties() {
 		return this.props;
 	}
- 
+
 	constructor(params: IBlockParams) {
 		super();
 		this.animationService = new AnimationService();
@@ -27,7 +27,7 @@ export default class Block extends Sprite {
 		this.eventMode = 'static';
 		this.cursor = 'pointer';
 		this.on('click', this.onClick, this);
-		this.on('touchend', this.onClick, this);
+		this.on('tap', this.onClick, this);
 		this.on('pointerover', this.onPointerOver, this);
 		this.on('pointerleave', this.onPointerLeave, this);
 		this.on('mousedown', this.onMouseDown, this);
@@ -39,45 +39,45 @@ export default class Block extends Sprite {
 		}
 		this.create();
 	}
- 
+
 	public async remove() {
 		await this.animationService.removeBlock(this);
 		this.destroy();
 	}
- 
+
 	private setPosition(position: IPosition) {
 		this.props.position = position;
 	}
- 
+
 	public async moveTo(position: IPosition, realPosition: IPosition) {
 		this.setPosition(position);
 		await this.animationService.moveBlockToTheBottom(this, realPosition);
 	}
- 
+
 	private onClick() {
 		this.onClickCallback(this);
 	}
- 
+
 	private onMouseDown() {
 		this.alpha = 0.5;
 	}
- 
+
 	private onMouseUp() {
 		this.alpha = 0.8;
 	}
- 
+
 	private onPointerOver() {
 		this.alpha = 0.8;
 	}
- 
+
 	private onPointerLeave() {
 		this.alpha = 1;
 	}
-	
+
 	public async addBlock() {
 		await this.animationService.createBlock(this);
 	}
- 
+
 	public create() {
 		this.texture = loaderService.blocksTextures[this.props.color];
 	}
